@@ -1,4 +1,5 @@
 import { useRef, useState, useCallback } from 'react';
+import nyungweMapImage from '@/assets/nyungwe-map.jpg';
 import type { Trail, UserLocation, RestArea, Attraction } from '@/lib/types';
 import { coordsToPercent } from '@/lib/trail-data';
 import { MapPin, Navigation, ZoomIn, ZoomOut, Locate, Eye, Droplets, Bird, Flower2 } from 'lucide-react';
