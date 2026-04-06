@@ -1,4 +1,5 @@
 import { useRef, useState, useCallback } from 'react';
+import nyungweMapImage from '@/assets/nyungwe-map.jpg';
 import type { Trail, UserLocation, RestArea, Attraction } from '@/lib/types';
 import { coordsToPercent } from '@/lib/trail-data';
 import { MapPin, Navigation, ZoomIn, ZoomOut, Locate, Eye, Droplets, Bird, Flower2 } from 'lucide-react';
@@ -76,7 +77,7 @@ export function TrailMap({ trail, userLocation, onSelectAttraction, onSelectRest
         onTouchStart={handleMouseDown} onTouchMove={handleMouseMove} onTouchEnd={handleMouseUp} onWheel={handleWheel}>
         <div className="absolute origin-top-left transition-transform duration-100" style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, width: '100%', height: '100%' }}>
           <div className="relative w-full h-full">
-            <img src="/images/nyungwe-trails-map.jpg" alt="Nyungwe Forest National Park Trail Map" className="w-full h-full object-contain" draggable={false} />
+            <img src={nyungweMapImage} alt="Nyungwe Forest National Park Trail Map" className="w-full h-full object-contain" draggable={false} />
 
             <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
               <path d={trail.path.map((point, i) => { const pos = coordsToPercent(point.lat, point.lng); return `${i === 0 ? 'M' : 'L'} ${pos.x} ${pos.y}`; }).join(' ')}
