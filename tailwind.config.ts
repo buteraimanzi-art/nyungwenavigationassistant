@@ -57,6 +57,19 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        forest: {
+          deep: "hsl(var(--forest-deep))",
+          canopy: "hsl(var(--forest-canopy))",
+          light: "hsl(var(--forest-light))",
+        },
+        trail: {
+          earth: "hsl(var(--trail-earth))",
+          marker: "hsl(var(--trail-marker))",
+        },
+        water: "hsl(var(--water))",
+        wildlife: "hsl(var(--wildlife))",
+        flora: "hsl(var(--flora))",
+        viewpoint: "hsl(var(--viewpoint))",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -65,20 +78,12 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {
