@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TreePine, MapPin, Navigation, ArrowLeft, ChevronUp, X } from 'lucide-react';
-import nyungweMap from '@/assets/nyungwe-map.jpg';
+import nyungweHero from '@/assets/nyungwe-hero.jpg';
 
 export default function Index() {
   const [selectedTrail, setSelectedTrail] = useState<Trail | null>(null);
