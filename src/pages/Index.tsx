@@ -39,7 +39,7 @@ export default function Index() {
           {/* Hero */}
           <div className="relative rounded-2xl overflow-hidden mb-8 border border-border">
             <div className="absolute inset-0">
-              <img src={nyungweMap} alt="" className="w-full h-full object-cover opacity-15" />
+              <img src={nyungweHero} alt="" className="w-full h-full object-cover opacity-20" />
             </div>
             <div className="relative p-6 md:p-8 bg-gradient-to-r from-background/95 to-background/80">
               <div className="flex items-center gap-3 mb-4">
