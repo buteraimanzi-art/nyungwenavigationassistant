@@ -27,7 +27,9 @@ function createDivIcon(label: string, background: string, size = 32) {
 }
 
 const receptionIcon = createDivIcon('R', '#16a34a', 32);
+const hqIcon = createDivIcon('HQ', '#b91c1c', 38);
 const activeReceptionIcon = createDivIcon('R', '#ea580c', 38);
+const activeHqIcon = createDivIcon('HQ', '#ea580c', 42);
 const trailStartIcon = createDivIcon('T', '#0f766e', 30);
 const userIcon = createDivIcon('•', '#2563eb', 20);
 
@@ -91,9 +93,15 @@ export function LeafletTrailMap({ trail, userLocation, showDirections }: Leaflet
     });
 
     RECEPTIONS.forEach((reception) => {
-      const marker = L.marker([reception.coordinates.lat, reception.coordinates.lng], {
-        icon: activeReception?.id === reception.id ? activeReceptionIcon : receptionIcon,
-      });
+      const isHQ = reception.id === 'reception-gisakura';
+      const isActive = activeReception?.id === reception.id;
+      let icon;
+      if (isActive) {
+        icon = isHQ ? activeHqIcon : activeReceptionIcon;
+      } else {
+        icon = isHQ ? hqIcon : receptionIcon;
+      }
+      const marker = L.marker([reception.coordinates.lat, reception.coordinates.lng], { icon });
       marker.bindPopup(`
         <div style="font-size:12px;line-height:1.4;min-width:180px;">
           <strong>${reception.name}</strong><br/>
