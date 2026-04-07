@@ -50,11 +50,11 @@ const TRAIL_RECEPTION_MAP: Record<string, string> = {
   'trail-kamiranzovu-waterfall': 'reception-uwinka',
   'trail-ndambarare': 'reception-uwinka',
   'trail-bigugu': 'reception-uwinka',
-  'trail-muzimu': 'reception-kitabi',
-  'trail-cyinzobe': 'reception-kitabi',
-  'trail-congo-nile': 'reception-kitabi',
-  'trail-uwasenkoko-mubuga': 'reception-kitabi',
-  'trail-nshili-uwasenkoko': 'reception-kitabi',
+  'trail-muzimu': 'reception-gisovu',
+  'trail-cyinzobe': 'reception-gisovu',
+  'trail-congo-nile': 'reception-gisovu',
+  'trail-uwasenkoko-mubuga': 'reception-gisovu',
+  'trail-nshili-uwasenkoko': 'reception-gisovu',
 };
 
 export function getReceptionForTrail(trailId: string): Reception {
