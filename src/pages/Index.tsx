@@ -42,6 +42,7 @@ export default function Index() {
     setSelectedTrail(null);
     setShowTrailSelector(true);
     setShowDirections(false);
+    setChosenReception(null);
   };
 
   return (
