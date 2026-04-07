@@ -103,7 +103,7 @@ export default function Index() {
               </div>
             </aside>
             <main className="flex-1 relative">
-              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} />
+              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} />
               {(selectedAttraction || selectedRestArea) && (
                 <div className="absolute top-4 left-4 right-4 max-w-sm z-20">
                   <Card className="shadow-lg">
