@@ -27,10 +27,10 @@ export const RECEPTIONS: Reception[] = [
     phone: '+250 788 000 002',
   },
   {
-    id: 'reception-kitabi',
-    name: 'Kitabi Reception',
-    coordinates: { lat: -2.408, lng: 29.335 },
-    description: 'Eastern entrance. Check-in for Muzimu, Cyinzobe, Congo–Nile, Uwasenkoko–Mubuga, and Nshili–Uwasenkoko trails.',
+    id: 'reception-gisovu',
+    name: 'Gisovu Reception',
+    coordinates: { lat: -2.382, lng: 29.340 },
+    description: 'Northeast entrance near Source of the Nile. Check-in for Muzimu, Cyinzobe, Congo–Nile, Uwasenkoko–Mubuga, and Nshili–Uwasenkoko trails.',
     phone: '+250 788 000 003',
   },
 ];
