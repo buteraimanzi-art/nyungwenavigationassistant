@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ParkHeader } from '@/components/park/ParkHeader';
-import { TrailMap } from '@/components/park/TrailMap';
+import { LeafletTrailMap } from '@/components/park/LeafletTrailMap';
 import { TrailInfoPanel } from '@/components/park/TrailInfoPanel';
 import { TrailSelector, CurrentTrailBadge } from '@/components/park/TrailSelector';
 import { DirectionsPanel } from '@/components/park/DirectionsPanel';
