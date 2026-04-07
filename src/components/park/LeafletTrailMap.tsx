@@ -3,7 +3,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { Trail, UserLocation, Attraction, RestArea } from '@/lib/types';
 import { TRAIL_GPS_PATHS } from '@/lib/trail-gps-paths';
-import { RECEPTIONS, getReceptionForTrail } from '@/lib/receptions';
+import { RECEPTIONS, type Reception } from '@/lib/receptions';
 
 const PARK_CENTER: [number, number] = [-2.45, 29.25];
 const PARK_ZOOM = 12;
@@ -13,6 +13,7 @@ interface LeafletTrailMapProps {
   trail: Trail;
   userLocation: UserLocation | null;
   showDirections?: boolean;
+  chosenReception?: Reception | null;
   onSelectAttraction?: (a: Attraction) => void;
   onSelectRestArea?: (r: RestArea) => void;
 }
@@ -33,14 +34,14 @@ const activeHqIcon = createDivIcon('HQ', '#ea580c', 42);
 const trailStartIcon = createDivIcon('T', '#0f766e', 30);
 const userIcon = createDivIcon('•', '#2563eb', 20);
 
-export function LeafletTrailMap({ trail, userLocation, showDirections }: LeafletTrailMapProps) {
+export function LeafletTrailMap({ trail, userLocation, showDirections, chosenReception }: LeafletTrailMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerGroupRef = useRef<L.LayerGroup | null>(null);
 
   const trailPaths = useMemo(() => TRAIL_GPS_PATHS.filter((p) => p.category === 'trail'), []);
   const roadPaths = useMemo(() => TRAIL_GPS_PATHS.filter((p) => p.category === 'road'), []);
-  const activeReception = useMemo(() => (showDirections ? getReceptionForTrail(trail.id) : null), [showDirections, trail]);
+  const activeReception = showDirections && chosenReception ? chosenReception : null;
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;

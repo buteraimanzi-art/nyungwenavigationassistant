@@ -8,6 +8,7 @@ import { EmergencySOS } from '@/components/park/EmergencySOS';
 import { trails, calculateTrailProgress } from '@/lib/trail-data';
 import { useDemoLocation } from '@/hooks/use-location';
 import type { Trail, Attraction, RestArea } from '@/lib/types';
+import type { Reception } from '@/lib/receptions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +22,7 @@ export default function Index() {
   const [selectedRestArea, setSelectedRestArea] = useState<RestArea | null>(null);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const [showDirections, setShowDirections] = useState(false);
+  const [chosenReception, setChosenReception] = useState<Reception | null>(null);
 
   const { location: userLocation } = useDemoLocation();
 
@@ -33,12 +35,14 @@ export default function Index() {
     setSelectedTrail(trail);
     setShowTrailSelector(false);
     setShowDirections(false);
+    setChosenReception(null);
   };
 
   const handleBackToTrails = () => {
     setSelectedTrail(null);
     setShowTrailSelector(true);
     setShowDirections(false);
+    setChosenReception(null);
   };
 
   return (
@@ -92,14 +96,14 @@ export default function Index() {
                   trail={selectedTrail}
                   userLocation={userLocation}
                   isActive={showDirections}
-                  onStartDirections={() => setShowDirections(true)}
+                  onStartDirections={(reception) => { setChosenReception(reception); setShowDirections(true); }}
                   onClose={() => setShowDirections(false)}
                 />
                 <TrailInfoPanel trail={selectedTrail} progress={trailProgress} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} />
               </div>
             </aside>
             <main className="flex-1 relative">
-              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} />
+              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} />
               {(selectedAttraction || selectedRestArea) && (
                 <div className="absolute top-4 left-4 right-4 max-w-sm z-20">
                   <Card className="shadow-lg">
@@ -126,7 +130,7 @@ export default function Index() {
               {userLocation && <Badge variant="outline" className="gap-1"><div className="w-2 h-2 rounded-full bg-forest-canopy animate-pulse" />GPS</Badge>}
             </div>
             <div className="flex-1 relative">
-              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} />
+              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} />
             </div>
             <div className={`absolute left-0 right-0 bottom-0 bg-card border-t border-border rounded-t-2xl shadow-lg transition-all duration-300 ${isBottomSheetExpanded ? 'h-[70vh]' : 'h-[220px]'}`}>
               <button className="w-full flex justify-center py-2" onClick={() => setIsBottomSheetExpanded(!isBottomSheetExpanded)}>
@@ -137,7 +141,7 @@ export default function Index() {
                   trail={selectedTrail}
                   userLocation={userLocation}
                   isActive={showDirections}
-                  onStartDirections={() => setShowDirections(true)}
+                  onStartDirections={(reception) => { setChosenReception(reception); setShowDirections(true); }}
                   onClose={() => setShowDirections(false)}
                 />
                 <div className="mt-4">
