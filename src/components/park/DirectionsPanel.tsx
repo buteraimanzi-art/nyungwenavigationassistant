@@ -1,15 +1,16 @@
-import { MapPin, Navigation, AlertTriangle, Phone, ArrowRight } from 'lucide-react';
+import { useState } from 'react';
+import { MapPin, Navigation, AlertTriangle, Phone, ArrowRight, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { Trail, UserLocation } from '@/lib/types';
-import { Reception, getReceptionForTrail, getDistanceToReception, isNearPark } from '@/lib/receptions';
+import { RECEPTIONS, Reception, getReceptionForTrail, getDistanceToReception, isNearPark } from '@/lib/receptions';
 
 interface DirectionsPanelProps {
   trail: Trail;
   userLocation: UserLocation | null;
-  onStartDirections: () => void;
+  onStartDirections: (reception: Reception) => void;
   onClose: () => void;
   isActive: boolean;
 }
@@ -19,11 +20,19 @@ function formatDist(meters: number): string {
 }
 
 export function DirectionsPanel({ trail, userLocation, onStartDirections, onClose, isActive }: DirectionsPanelProps) {
-  const reception = getReceptionForTrail(trail.id);
+  const defaultReception = getReceptionForTrail(trail.id);
+  const [selectedReception, setSelectedReception] = useState<Reception>(defaultReception);
+  const [showPicker, setShowPicker] = useState(false);
+
   const userDistToReception = userLocation
-    ? getDistanceToReception(userLocation, reception)
+    ? getDistanceToReception(userLocation, selectedReception)
     : null;
   const userNearPark = userLocation ? isNearPark(userLocation) : false;
+
+  const handleSelectReception = (reception: Reception) => {
+    setSelectedReception(reception);
+    setShowPicker(false);
+  };
 
   return (
     <div className="space-y-3">
@@ -33,12 +42,12 @@ export function DirectionsPanel({ trail, userLocation, onStartDirections, onClos
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>You are outside the park</AlertTitle>
           <AlertDescription>
-            Please travel to <strong>{reception.name}</strong> first to check in before starting the trail.
+            Please travel to <strong>{selectedReception.name}</strong> first to check in before starting the trail.
           </AlertDescription>
         </Alert>
       )}
 
-      {/* Reception card */}
+      {/* Reception picker */}
       <Card className="border-primary/30 bg-primary/5">
         <CardContent className="p-4 space-y-3">
           <div className="flex items-start gap-3">
@@ -46,17 +55,73 @@ export function DirectionsPanel({ trail, userLocation, onStartDirections, onClos
               <MapPin className="w-5 h-5 text-primary-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-foreground text-sm">Start at: {reception.name}</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">{reception.description}</p>
-              {reception.phone && (
-                <a href={`tel:${reception.phone}`} className="inline-flex items-center gap-1 text-xs text-primary mt-1 hover:underline">
-                  <Phone className="w-3 h-3" /> {reception.phone}
-                </a>
-              )}
+              <p className="text-xs text-muted-foreground mb-1">Start from:</p>
+              <button
+                onClick={() => setShowPicker(!showPicker)}
+                className="w-full flex items-center justify-between gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm font-semibold text-foreground hover:bg-accent transition-colors"
+              >
+                <span className="truncate">{selectedReception.name}</span>
+                <ChevronDown className={`w-4 h-4 shrink-0 text-muted-foreground transition-transform ${showPicker ? 'rotate-180' : ''}`} />
+              </button>
             </div>
           </div>
 
-          {/* Distance from user to reception */}
+          {/* Reception options */}
+          {showPicker && (
+            <div className="space-y-2 pt-1">
+              {RECEPTIONS.map((r) => {
+                const dist = userLocation ? getDistanceToReception(userLocation, r) : null;
+                const isDefault = r.id === defaultReception.id;
+                const isSelected = r.id === selectedReception.id;
+                return (
+                  <button
+                    key={r.id}
+                    onClick={() => handleSelectReception(r)}
+                    className={`w-full text-left rounded-lg border p-3 transition-colors ${
+                      isSelected
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border bg-background hover:bg-accent'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-medium text-sm text-foreground">{r.name}</span>
+                      <div className="flex items-center gap-1.5">
+                        {isDefault && (
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Nearest</Badge>
+                        )}
+                        {isSelected && (
+                          <div className="w-2 h-2 rounded-full bg-primary" />
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{r.description}</p>
+                    {dist !== null && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        📍 {formatDist(dist)} from you
+                      </p>
+                    )}
+                    {r.phone && (
+                      <p className="text-xs text-muted-foreground mt-0.5">📞 {r.phone}</p>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Collapsed info */}
+          {!showPicker && (
+            <>
+              <p className="text-xs text-muted-foreground">{selectedReception.description}</p>
+              {selectedReception.phone && (
+                <a href={`tel:${selectedReception.phone}`} className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                  <Phone className="w-3 h-3" /> {selectedReception.phone}
+                </a>
+              )}
+            </>
+          )}
+
+          {/* Distance from user */}
           {userDistToReception !== null && (
             <div className="flex items-center gap-2 pt-2 border-t border-border">
               <Navigation className="w-4 h-4 text-muted-foreground" />
@@ -80,7 +145,7 @@ export function DirectionsPanel({ trail, userLocation, onStartDirections, onClos
           <div className="flex items-center gap-2 text-sm">
             <div className="flex items-center gap-1">
               <div className="w-2.5 h-2.5 rounded-full bg-accent-foreground border-2 border-primary" />
-              <span className="text-muted-foreground">{reception.name}</span>
+              <span className="text-muted-foreground truncate max-w-[140px]">{selectedReception.name}</span>
             </div>
             <div className="flex-1 border-t-2 border-dashed border-primary/40 mx-1" />
             <div className="flex items-center gap-1">
@@ -94,7 +159,7 @@ export function DirectionsPanel({ trail, userLocation, onStartDirections, onClos
       {/* Action buttons */}
       <div className="flex gap-2">
         {!isActive ? (
-          <Button className="flex-1 gap-2" onClick={onStartDirections}>
+          <Button className="flex-1 gap-2" onClick={() => onStartDirections(selectedReception)}>
             <Navigation className="w-4 h-4" />
             Show Directions on Map
           </Button>
