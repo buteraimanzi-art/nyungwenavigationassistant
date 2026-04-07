@@ -142,7 +142,9 @@ export function LeafletTrailMap({ trail, userLocation, showDirections }: Leaflet
         `)
         .addTo(layerGroup);
 
-      map.flyTo([userLocation.lat, userLocation.lng], 13, { duration: 1.2 });
+      if (isFinite(userLocation.lat) && isFinite(userLocation.lng)) {
+        map.setView([userLocation.lat, userLocation.lng], 13);
+      }
     } else {
       map.setView(PARK_CENTER, PARK_ZOOM);
     }
