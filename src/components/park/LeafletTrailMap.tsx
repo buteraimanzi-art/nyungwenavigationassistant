@@ -93,9 +93,15 @@ export function LeafletTrailMap({ trail, userLocation, showDirections }: Leaflet
     });
 
     RECEPTIONS.forEach((reception) => {
-      const marker = L.marker([reception.coordinates.lat, reception.coordinates.lng], {
-        icon: activeReception?.id === reception.id ? activeReceptionIcon : receptionIcon,
-      });
+      const isHQ = reception.id === 'reception-gisakura';
+      const isActive = activeReception?.id === reception.id;
+      let icon;
+      if (isActive) {
+        icon = isHQ ? activeHqIcon : activeReceptionIcon;
+      } else {
+        icon = isHQ ? hqIcon : receptionIcon;
+      }
+      const marker = L.marker([reception.coordinates.lat, reception.coordinates.lng], { icon });
       marker.bindPopup(`
         <div style="font-size:12px;line-height:1.4;min-width:180px;">
           <strong>${reception.name}</strong><br/>
