@@ -96,7 +96,7 @@ export default function Index() {
                   trail={selectedTrail}
                   userLocation={userLocation}
                   isActive={showDirections}
-                  onStartDirections={() => setShowDirections(true)}
+                  onStartDirections={(reception) => { setChosenReception(reception); setShowDirections(true); }}
                   onClose={() => setShowDirections(false)}
                 />
                 <TrailInfoPanel trail={selectedTrail} progress={trailProgress} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} />
