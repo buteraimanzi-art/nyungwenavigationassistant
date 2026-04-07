@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ParkHeader } from '@/components/park/ParkHeader';
-import { TrailMap } from '@/components/park/TrailMap';
+import { LeafletTrailMap } from '@/components/park/LeafletTrailMap';
 import { TrailInfoPanel } from '@/components/park/TrailInfoPanel';
 import { TrailSelector, CurrentTrailBadge } from '@/components/park/TrailSelector';
 import { DirectionsPanel } from '@/components/park/DirectionsPanel';
@@ -99,7 +99,7 @@ export default function Index() {
               </div>
             </aside>
             <main className="flex-1 relative">
-              <TrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} />
+              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} />
               {(selectedAttraction || selectedRestArea) && (
                 <div className="absolute top-4 left-4 right-4 max-w-sm z-20">
                   <Card className="shadow-lg">
@@ -126,7 +126,7 @@ export default function Index() {
               {userLocation && <Badge variant="outline" className="gap-1"><div className="w-2 h-2 rounded-full bg-forest-canopy animate-pulse" />GPS</Badge>}
             </div>
             <div className="flex-1 relative">
-              <TrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} />
+              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} />
             </div>
             <div className={`absolute left-0 right-0 bottom-0 bg-card border-t border-border rounded-t-2xl shadow-lg transition-all duration-300 ${isBottomSheetExpanded ? 'h-[70vh]' : 'h-[220px]'}`}>
               <button className="w-full flex justify-center py-2" onClick={() => setIsBottomSheetExpanded(!isBottomSheetExpanded)}>
