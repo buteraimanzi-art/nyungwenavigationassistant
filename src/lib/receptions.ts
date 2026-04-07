@@ -11,26 +11,27 @@ export interface Reception {
 }
 
 // The 3 official reception/gate points on the Nyungwe map
+// Uwinka is the MAIN reception (central hub where most trails start)
 export const RECEPTIONS: Reception[] = [
+  {
+    id: 'reception-uwinka',
+    name: 'Uwinka Reception (Main)',
+    coordinates: { lat: -2.4625, lng: 29.198 },
+    description: 'Main reception & central hub. Primary check-in for most trails including Igishigishigi, Buhoro, Umuyove, Imbaraga, Irebero, Umugote, Rukuzi, Uwinka, Kamiranzovu, Karamba, Kamiranzovu Waterfall, Ndambarare, and Bigugu.',
+    phone: '+250 788 000 001',
+  },
   {
     id: 'reception-gisakura',
     name: 'Gisakura Reception',
     coordinates: { lat: -2.478, lng: 29.105 },
-    description: 'Western entrance. Check-in point for Igishigishigi, Buhoro, Umuyove, Imbaraga, Irebero, Umugote, and Rukuzi trails.',
-    phone: '+250 788 000 001',
-  },
-  {
-    id: 'reception-uwinka',
-    name: 'Uwinka Reception',
-    coordinates: { lat: -2.468, lng: 29.198 },
-    description: 'Central entrance. Check-in point for Uwinka, Kamiranzovu, Karamba, Kamiranzovu Waterfall, Ndambarare, and Bigugu trails.',
+    description: 'Western entrance near Gisakura village. Secondary check-in for western trails.',
     phone: '+250 788 000 002',
   },
   {
     id: 'reception-gisovu',
     name: 'Gisovu Reception',
     coordinates: { lat: -2.382, lng: 29.340 },
-    description: 'Northeast entrance near Source of the Nile. Check-in for Muzimu, Cyinzobe, Congo–Nile, Uwasenkoko–Mubuga, and Nshili–Uwasenkoko trails.',
+    description: 'Northeast entrance near Source of the Nile. Check-in for Muzimu, Cyinzobe, Congo–Nile, and eastern trails.',
     phone: '+250 788 000 003',
   },
 ];
