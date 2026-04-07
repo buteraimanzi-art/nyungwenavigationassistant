@@ -8,6 +8,7 @@ import { EmergencySOS } from '@/components/park/EmergencySOS';
 import { trails, calculateTrailProgress } from '@/lib/trail-data';
 import { useDemoLocation } from '@/hooks/use-location';
 import type { Trail, Attraction, RestArea } from '@/lib/types';
+import type { Reception } from '@/lib/receptions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
