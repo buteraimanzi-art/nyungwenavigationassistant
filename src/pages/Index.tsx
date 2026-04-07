@@ -10,7 +10,7 @@ import type { Trail, Attraction, RestArea } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TreePine, MapPin, Navigation, ArrowLeft, ChevronUp, X } from 'lucide-react';
+import { TreePine, MapPin, Navigation, ArrowLeft, X } from 'lucide-react';
 import nyungweHero from '@/assets/nyungwe-hero.jpg';
 
 export default function Index() {
@@ -23,12 +23,19 @@ export default function Index() {
   const { location: userLocation } = useDemoLocation();
 
   const trailProgress = useMemo(() => {
-    if (!selectedTrail || !userLocation) return null;
+    if (!selectedTrail || !userLocation || selectedTrail.path.length < 2) return null;
     return calculateTrailProgress(userLocation, selectedTrail);
   }, [selectedTrail, userLocation]);
 
-  const handleSelectTrail = (trail: Trail) => { setSelectedTrail(trail); setShowTrailSelector(false); };
-  const handleBackToTrails = () => { setSelectedTrail(null); setShowTrailSelector(true); };
+  const handleSelectTrail = (trail: Trail) => {
+    setSelectedTrail(trail);
+    setShowTrailSelector(false);
+  };
+
+  const handleBackToTrails = () => {
+    setSelectedTrail(null);
+    setShowTrailSelector(true);
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -36,7 +43,6 @@ export default function Index() {
 
       {showTrailSelector ? (
         <main className="flex-1 container max-w-4xl mx-auto px-4 py-6">
-          {/* Hero */}
           <div className="relative rounded-2xl overflow-hidden mb-8 border border-border">
             <div className="absolute inset-0">
               <img src={nyungweHero} alt="" className="w-full h-full object-cover opacity-20" />
@@ -52,13 +58,13 @@ export default function Index() {
                 </div>
               </div>
               <p className="text-muted-foreground max-w-2xl leading-relaxed">
-                Explore one of Africa's oldest rainforests. Track your location in real-time,
-                discover nearby attractions, find rest areas, and stay safe with our emergency alert system.
+                Explore one of Africa's oldest rainforests with the official park map you uploaded.
+                Trail names and distances are now matched to that source.
               </p>
               <div className="flex flex-wrap gap-3 mt-4">
                 <Badge variant="secondary" className="gap-1"><MapPin className="w-3 h-3" />Rwanda, Southwest</Badge>
                 <Badge variant="secondary" className="gap-1"><TreePine className="w-3 h-3" />1,019 km² Rainforest</Badge>
-                <Badge variant="secondary" className="gap-1"><Navigation className="w-3 h-3" />13 Primate Species</Badge>
+                <Badge variant="secondary" className="gap-1"><Navigation className="w-3 h-3" />Official trail map</Badge>
               </div>
             </div>
           </div>
@@ -67,7 +73,6 @@ export default function Index() {
         </main>
       ) : selectedTrail ? (
         <>
-          {/* Desktop */}
           <div className="hidden md:flex flex-1 overflow-hidden">
             <aside className="w-[400px] border-r border-border bg-card overflow-y-auto">
               <div className="p-4 border-b border-border sticky top-0 bg-card z-10">
@@ -100,7 +105,6 @@ export default function Index() {
             </main>
           </div>
 
-          {/* Mobile */}
           <div className="md:hidden flex-1 flex flex-col relative">
             <div className="p-3 border-b border-border bg-card flex items-center justify-between">
               <Button variant="ghost" size="sm" onClick={handleBackToTrails} className="gap-1 -ml-2"><ArrowLeft className="w-4 h-4" /></Button>
