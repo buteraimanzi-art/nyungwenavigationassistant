@@ -35,6 +35,7 @@ export default function Index() {
     setSelectedTrail(trail);
     setShowTrailSelector(false);
     setShowDirections(false);
+    setChosenReception(null);
   };
 
   const handleBackToTrails = () => {
