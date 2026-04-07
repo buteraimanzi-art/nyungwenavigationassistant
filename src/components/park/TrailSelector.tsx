@@ -35,37 +35,59 @@ export function TrailSelector({ trails, selectedTrailId, onSelectTrail }: TrailS
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3 px-1">
-        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-          <TreePine className="w-5 h-5 text-primary" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+          <TreePine className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold">Choose a Trail</h2>
-          <p className="text-sm text-muted-foreground">Select a trail to start your adventure</p>
+          <h2 className="text-lg font-semibold">Choose an Official Trail</h2>
+          <p className="text-sm text-muted-foreground">Names and distances now come from your uploaded Nyungwe park map</p>
         </div>
       </div>
       <ScrollArea className="h-[calc(100vh-340px)]">
         <div className="space-y-3 pr-4">
-          {trails.map(trail => (
-            <Card key={trail.id} className={`cursor-pointer transition-all hover:shadow-md ${selectedTrailId === trail.id ? 'ring-2 ring-primary bg-primary/5' : 'hover:bg-muted/50'}`} onClick={() => onSelectTrail(trail)}>
+          {trails.map((trail) => (
+            <Card key={trail.id} className={`cursor-pointer transition-all hover:shadow-md ${selectedTrailId === trail.id ? 'bg-primary/5 ring-2 ring-primary' : 'hover:bg-muted/50'}`} onClick={() => onSelectTrail(trail)}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold truncate">{trail.name}</h3>
-                      <Badge className={getDifficultyVariant(trail.difficulty)} variant="outline">{trail.difficulty}</Badge>
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1 flex items-center gap-2">
+                      <h3 className="truncate font-semibold">{trail.name}</h3>
+                      {trail.path.length > 1 && (
+                        <Badge className={getDifficultyVariant(trail.difficulty)} variant="outline">
+                          {trail.difficulty}
+                        </Badge>
+                      )}
                     </div>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{trail.description}</p>
-                    <div className="flex items-center gap-4 text-sm">
-                      <div className="flex items-center gap-1.5 text-muted-foreground"><Footprints className="w-4 h-4" /><span>{formatDistance(trail.totalDistance)}</span></div>
-                      <div className="flex items-center gap-1.5 text-muted-foreground"><Clock className="w-4 h-4" /><span>{formatDuration(trail.estimatedDuration)}</span></div>
-                      <div className="flex items-center gap-1.5 text-muted-foreground"><Mountain className="w-4 h-4" /><span>{trail.elevationGain}m</span></div>
+                    <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">{trail.description}</p>
+                    <div className="flex flex-wrap items-center gap-4 text-sm">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Footprints className="h-4 w-4" />
+                        <span>{formatDistance(trail.totalDistance)}</span>
+                      </div>
+                      {trail.estimatedDuration > 0 && (
+                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                          <Clock className="h-4 w-4" />
+                          <span>{formatDuration(trail.estimatedDuration)}</span>
+                        </div>
+                      )}
+                      {trail.elevationGain > 0 && (
+                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                          <Mountain className="h-4 w-4" />
+                          <span>{trail.elevationGain}m</span>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2 mt-3">
-                      <Badge variant="secondary" className="text-xs"><MapPin className="w-3 h-3 mr-1" />{trail.attractions.length} attractions</Badge>
-                      <Badge variant="secondary" className="text-xs">{trail.restAreas.length} rest areas</Badge>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">Official map route</Badge>
+                      {(trail.attractions.length > 0 || trail.restAreas.length > 0) && (
+                        <>
+                          <Badge variant="secondary" className="text-xs"><MapPin className="mr-1 h-3 w-3" />{trail.attractions.length} attractions</Badge>
+                          <Badge variant="secondary" className="text-xs">{trail.restAreas.length} rest areas</Badge>
+                        </>
+                      )}
                     </div>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-1" />
+                  <ChevronRight className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
                 </div>
               </CardContent>
             </Card>
@@ -78,9 +100,9 @@ export function TrailSelector({ trails, selectedTrailId, onSelectTrail }: TrailS
 
 export function CurrentTrailBadge({ trail }: { trail: Trail }) {
   return (
-    <div className="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-full">
-      <TreePine className="w-4 h-4 text-primary" />
-      <span className="text-sm font-medium text-primary truncate max-w-[150px]">{trail.name}</span>
+    <div className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5">
+      <TreePine className="h-4 w-4 text-primary" />
+      <span className="max-w-[150px] truncate text-sm font-medium text-primary">{trail.name}</span>
     </div>
   );
 }
