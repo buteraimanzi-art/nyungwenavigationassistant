@@ -27,7 +27,9 @@ function createDivIcon(label: string, background: string, size = 32) {
 }
 
 const receptionIcon = createDivIcon('R', '#16a34a', 32);
+const hqIcon = createDivIcon('HQ', '#b91c1c', 38);
 const activeReceptionIcon = createDivIcon('R', '#ea580c', 38);
+const activeHqIcon = createDivIcon('HQ', '#ea580c', 42);
 const trailStartIcon = createDivIcon('T', '#0f766e', 30);
 const userIcon = createDivIcon('•', '#2563eb', 20);
 
