@@ -3,7 +3,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { Trail, UserLocation, Attraction, RestArea } from '@/lib/types';
 import { TRAIL_GPS_PATHS } from '@/lib/trail-gps-paths';
-import { RECEPTIONS, getReceptionForTrail } from '@/lib/receptions';
+import { RECEPTIONS, type Reception } from '@/lib/receptions';
 
 const PARK_CENTER: [number, number] = [-2.45, 29.25];
 const PARK_ZOOM = 12;
