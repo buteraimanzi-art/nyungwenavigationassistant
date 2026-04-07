@@ -22,6 +22,7 @@ export default function Index() {
   const [selectedRestArea, setSelectedRestArea] = useState<RestArea | null>(null);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const [showDirections, setShowDirections] = useState(false);
+  const [chosenReception, setChosenReception] = useState<Reception | null>(null);
 
   const { location: userLocation } = useDemoLocation();
 
