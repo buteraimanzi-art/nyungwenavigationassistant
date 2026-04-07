@@ -99,7 +99,7 @@ export function TrailInfoPanel({ trail, progress, onSelectAttraction, onSelectRe
           <CardContent className="pt-6">
             <div className="flex items-start gap-3">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <p className="text-sm text-muted-foreground">This view now follows your uploaded official Nyungwe map and no longer draws generated trail paths or made-up markers.</p>
+              <p className="text-sm text-muted-foreground">This view now overlays the official Nyungwe walking-trail linework traced directly from your uploaded PDF map.</p>
             </div>
           </CardContent>
         </Card>
