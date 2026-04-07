@@ -1,44 +1,13 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap, CircleMarker, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { Trail, UserLocation, Attraction, RestArea } from '@/lib/types';
 import { TRAIL_GPS_PATHS } from '@/lib/trail-gps-paths';
 import { RECEPTIONS, getReceptionForTrail } from '@/lib/receptions';
-import { calculateDistance } from '@/lib/trail-data';
 
-// Fix default marker icons
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
-
-const receptionIcon = new L.DivIcon({
-  html: `<div style="background:#16a34a;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);">R</div>`,
-  className: '',
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
-});
-
-const activeReceptionIcon = new L.DivIcon({
-  html: `<div style="background:#ea580c;color:white;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px;border:3px solid white;box-shadow:0 2px 12px rgba(234,88,12,0.5);animation:pulse 1.5s infinite;">R</div>`,
-  className: '',
-  iconSize: [38, 38],
-  iconAnchor: [19, 19],
-});
-
-const userIcon = new L.DivIcon({
-  html: `<div style="background:#3b82f6;border-radius:50%;width:16px;height:16px;border:3px solid white;box-shadow:0 0 0 3px rgba(59,130,246,0.3);"></div>`,
-  className: '',
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
-});
-
-// Nyungwe park center & bounds
 const PARK_CENTER: [number, number] = [-2.45, 29.25];
-const RWANDA_BOUNDS: L.LatLngBoundsExpression = [[-2.85, 28.85], [-1.05, 30.90]];
+const PARK_ZOOM = 12;
+const RWANDA_BOUNDS: L.LatLngBoundsExpression = [[-2.85, 28.85], [-1.05, 30.9]];
 
 interface LeafletTrailMapProps {
   trail: Trail;
@@ -48,138 +17,136 @@ interface LeafletTrailMapProps {
   onSelectRestArea?: (r: RestArea) => void;
 }
 
-function FlyToUser({ location }: { location: UserLocation | null }) {
-  const map = useMap();
-  useEffect(() => {
-    if (location) {
-      const dist = calculateDistance(
-        { lat: map.getCenter().lat, lng: map.getCenter().lng },
-        { lat: location.lat, lng: location.lng }
-      );
-      // Only fly if user is far from current center
-      if (dist > 5000) {
-        map.flyTo([location.lat, location.lng], 14, { duration: 1.5 });
-      }
-    }
-  }, []);
-  return null;
+function createDivIcon(label: string, background: string, size = 32) {
+  return L.divIcon({
+    html: `<div style="background:${background};color:white;border-radius:9999px;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${Math.round(size * 0.42)}px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.28);">${label}</div>`,
+    className: '',
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
 }
 
+const receptionIcon = createDivIcon('R', '#16a34a', 32);
+const activeReceptionIcon = createDivIcon('R', '#ea580c', 38);
+const trailStartIcon = createDivIcon('T', '#0f766e', 30);
+const userIcon = createDivIcon('•', '#2563eb', 20);
+
 export function LeafletTrailMap({ trail, userLocation, showDirections }: LeafletTrailMapProps) {
-  const trailPaths = useMemo(() => TRAIL_GPS_PATHS.filter(p => p.category === 'trail'), []);
-  const roadPaths = useMemo(() => TRAIL_GPS_PATHS.filter(p => p.category === 'road'), []);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const layerGroupRef = useRef<L.LayerGroup | null>(null);
 
-  const activeReception = useMemo(
-    () => showDirections ? getReceptionForTrail(trail.id) : null,
-    [showDirections, trail]
-  );
+  const trailPaths = useMemo(() => TRAIL_GPS_PATHS.filter((p) => p.category === 'trail'), []);
+  const roadPaths = useMemo(() => TRAIL_GPS_PATHS.filter((p) => p.category === 'road'), []);
+  const activeReception = useMemo(() => (showDirections ? getReceptionForTrail(trail.id) : null), [showDirections, trail]);
 
-  const directionLine = useMemo(() => {
-    if (!activeReception) return null;
-    const from: [number, number] = [activeReception.coordinates.lat, activeReception.coordinates.lng];
-    const to: [number, number] = [trail.startPoint.lat, trail.startPoint.lng];
-    return [from, to];
-  }, [activeReception, trail]);
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return;
 
-  return (
-    <div className="relative h-full min-h-[400px] w-full overflow-hidden rounded-lg border border-border">
-      <style>{`
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
-        .leaflet-container { height: 100%; width: 100%; background: hsl(var(--muted)); }
-      `}</style>
-      <MapContainer
-        center={PARK_CENTER}
-        zoom={12}
-        minZoom={8}
-        maxZoom={18}
-        maxBounds={RWANDA_BOUNDS}
-        style={{ height: '100%', width: '100%' }}
-        zoomControl={true}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+    const map = L.map(containerRef.current, {
+      center: PARK_CENTER,
+      zoom: PARK_ZOOM,
+      minZoom: 8,
+      maxZoom: 18,
+      maxBounds: RWANDA_BOUNDS,
+      zoomControl: true,
+    });
 
-        {/* Road overlays */}
-        {roadPaths.map(path => (
-          <Polyline
-            key={path.id}
-            positions={path.coords as [number, number][]}
-            pathOptions={{ color: '#dc2626', weight: 3, opacity: 0.6, dashArray: '8 4' }}
-          />
-        ))}
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(map);
 
-        {/* Trail overlays */}
-        {trailPaths.map(path => (
-          <Polyline
-            key={path.id}
-            positions={path.coords as [number, number][]}
-            pathOptions={{ color: '#16a34a', weight: 4, opacity: 0.8 }}
-          />
-        ))}
+    layerGroupRef.current = L.layerGroup().addTo(map);
+    mapRef.current = map;
 
-        {/* Direction path from reception to trail */}
-        {directionLine && (
-          <Polyline
-            positions={directionLine}
-            pathOptions={{ color: '#ea580c', weight: 4, opacity: 0.8, dashArray: '12 8' }}
-          />
-        )}
+    return () => {
+      map.remove();
+      mapRef.current = null;
+      layerGroupRef.current = null;
+    };
+  }, []);
 
-        {/* Reception markers */}
-        {RECEPTIONS.map(r => (
-          <Marker
-            key={r.id}
-            position={[r.coordinates.lat, r.coordinates.lng]}
-            icon={activeReception?.id === r.id ? activeReceptionIcon : receptionIcon}
-          >
-            <Popup>
-              <div className="text-sm">
-                <strong>{r.name}</strong>
-                <p className="text-xs mt-1 text-muted-foreground">{r.description}</p>
-                {r.phone && <p className="text-xs mt-1">📞 {r.phone}</p>}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+  useEffect(() => {
+    const map = mapRef.current;
+    const layerGroup = layerGroupRef.current;
+    if (!map || !layerGroup) return;
 
-        {/* Trail start marker */}
-        <Marker position={[trail.startPoint.lat, trail.startPoint.lng]}>
-          <Popup>
-            <strong>{trail.name}</strong>
-            <br />
-            <span className="text-xs">Trail start point</span>
-          </Popup>
-        </Marker>
+    layerGroup.clearLayers();
 
-        {/* User location */}
-        {userLocation && (
-          <>
-            <Circle
-              center={[userLocation.lat, userLocation.lng]}
-              radius={userLocation.accuracy}
-              pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.1, weight: 1 }}
-            />
-            <Marker
-              position={[userLocation.lat, userLocation.lng]}
-              icon={userIcon}
-            >
-              <Popup>
-                <strong>Your Location</strong>
-                <br />
-                <span className="text-xs font-mono">
-                  {userLocation.lat.toFixed(4)}°S, {userLocation.lng.toFixed(4)}°E
-                </span>
-                {userLocation.speed && userLocation.speed > 0.3 && (
-                  <><br /><span className="text-xs">{(userLocation.speed * 3.6).toFixed(1)} km/h</span></>
-                )}
-              </Popup>
-            </Marker>
-            <FlyToUser location={userLocation} />
-          </>
-        )}
-      </MapContainer>
-    </div>
-  );
+    roadPaths.forEach((path) => {
+      L.polyline(path.coords, {
+        color: '#dc2626',
+        weight: 3,
+        opacity: 0.6,
+        dashArray: '8 4',
+      }).addTo(layerGroup);
+    });
+
+    trailPaths.forEach((path) => {
+      L.polyline(path.coords, {
+        color: '#16a34a',
+        weight: 4,
+        opacity: 0.8,
+      }).addTo(layerGroup);
+    });
+
+    RECEPTIONS.forEach((reception) => {
+      const marker = L.marker([reception.coordinates.lat, reception.coordinates.lng], {
+        icon: activeReception?.id === reception.id ? activeReceptionIcon : receptionIcon,
+      });
+      marker.bindPopup(`
+        <div style="font-size:12px;line-height:1.4;min-width:180px;">
+          <strong>${reception.name}</strong><br/>
+          <span>${reception.description}</span>
+          ${reception.phone ? `<br/><span>📞 ${reception.phone}</span>` : ''}
+        </div>
+      `);
+      marker.addTo(layerGroup);
+    });
+
+    L.marker([trail.startPoint.lat, trail.startPoint.lng], { icon: trailStartIcon })
+      .bindPopup(`<strong>${trail.name}</strong><br/><span style="font-size:12px;">Trail start point</span>`)
+      .addTo(layerGroup);
+
+    if (activeReception) {
+      L.polyline(
+        [
+          [activeReception.coordinates.lat, activeReception.coordinates.lng],
+          [trail.startPoint.lat, trail.startPoint.lng],
+        ],
+        {
+          color: '#ea580c',
+          weight: 4,
+          opacity: 0.85,
+          dashArray: '12 8',
+        }
+      ).addTo(layerGroup);
+    }
+
+    if (userLocation) {
+      L.circle([userLocation.lat, userLocation.lng], {
+        radius: userLocation.accuracy,
+        color: '#2563eb',
+        fillColor: '#2563eb',
+        fillOpacity: 0.12,
+        weight: 1,
+      }).addTo(layerGroup);
+
+      L.marker([userLocation.lat, userLocation.lng], { icon: userIcon })
+        .bindPopup(`
+          <div style="font-size:12px;line-height:1.4;">
+            <strong>Your Location</strong><br/>
+            <span>${userLocation.lat.toFixed(4)}°S, ${userLocation.lng.toFixed(4)}°E</span>
+            ${userLocation.speed && userLocation.speed > 0.3 ? `<br/><span>${(userLocation.speed * 3.6).toFixed(1)} km/h</span>` : ''}
+          </div>
+        `)
+        .addTo(layerGroup);
+
+      map.flyTo([userLocation.lat, userLocation.lng], 13, { duration: 1.2 });
+    } else {
+      map.setView(PARK_CENTER, PARK_ZOOM);
+    }
+  }, [activeReception, roadPaths, trail, trailPaths, userLocation]);
+
+  return <div ref={containerRef} className="relative h-full min-h-[400px] w-full overflow-hidden rounded-lg border border-border bg-muted" />;
 }
