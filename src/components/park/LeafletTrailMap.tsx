@@ -34,14 +34,14 @@ const activeHqIcon = createDivIcon('HQ', '#ea580c', 42);
 const trailStartIcon = createDivIcon('T', '#0f766e', 30);
 const userIcon = createDivIcon('•', '#2563eb', 20);
 
-export function LeafletTrailMap({ trail, userLocation, showDirections }: LeafletTrailMapProps) {
+export function LeafletTrailMap({ trail, userLocation, showDirections, chosenReception }: LeafletTrailMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerGroupRef = useRef<L.LayerGroup | null>(null);
 
   const trailPaths = useMemo(() => TRAIL_GPS_PATHS.filter((p) => p.category === 'trail'), []);
   const roadPaths = useMemo(() => TRAIL_GPS_PATHS.filter((p) => p.category === 'road'), []);
-  const activeReception = useMemo(() => (showDirections ? getReceptionForTrail(trail.id) : null), [showDirections, trail]);
+  const activeReception = showDirections && chosenReception ? chosenReception : null;
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
