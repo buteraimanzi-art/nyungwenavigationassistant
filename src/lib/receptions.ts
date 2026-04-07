@@ -27,10 +27,10 @@ export const RECEPTIONS: Reception[] = [
     phone: '+250 788 000 002',
   },
   {
-    id: 'reception-kitabi',
-    name: 'Kitabi Reception',
-    coordinates: { lat: -2.408, lng: 29.335 },
-    description: 'Eastern entrance. Check-in for Muzimu, Cyinzobe, Congo–Nile, Uwasenkoko–Mubuga, and Nshili–Uwasenkoko trails.',
+    id: 'reception-gisovu',
+    name: 'Gisovu Reception',
+    coordinates: { lat: -2.382, lng: 29.340 },
+    description: 'Northeast entrance near Source of the Nile. Check-in for Muzimu, Cyinzobe, Congo–Nile, Uwasenkoko–Mubuga, and Nshili–Uwasenkoko trails.',
     phone: '+250 788 000 003',
   },
 ];
@@ -50,11 +50,11 @@ const TRAIL_RECEPTION_MAP: Record<string, string> = {
   'trail-kamiranzovu-waterfall': 'reception-uwinka',
   'trail-ndambarare': 'reception-uwinka',
   'trail-bigugu': 'reception-uwinka',
-  'trail-muzimu': 'reception-kitabi',
-  'trail-cyinzobe': 'reception-kitabi',
-  'trail-congo-nile': 'reception-kitabi',
-  'trail-uwasenkoko-mubuga': 'reception-kitabi',
-  'trail-nshili-uwasenkoko': 'reception-kitabi',
+  'trail-muzimu': 'reception-gisovu',
+  'trail-cyinzobe': 'reception-gisovu',
+  'trail-congo-nile': 'reception-gisovu',
+  'trail-uwasenkoko-mubuga': 'reception-gisovu',
+  'trail-nshili-uwasenkoko': 'reception-gisovu',
 };
 
 export function getReceptionForTrail(trailId: string): Reception {
