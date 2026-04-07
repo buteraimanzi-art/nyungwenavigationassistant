@@ -38,13 +38,13 @@ export const RECEPTIONS: Reception[] = [
 
 // Map trail IDs to their nearest reception
 const TRAIL_RECEPTION_MAP: Record<string, string> = {
-  'trail-igishigishigi': 'reception-gisakura',
-  'trail-buhoro': 'reception-gisakura',
-  'trail-umuyove': 'reception-gisakura',
-  'trail-imbaraga': 'reception-gisakura',
-  'trail-irebero': 'reception-gisakura',
-  'trail-umugote': 'reception-gisakura',
-  'trail-rukuzi': 'reception-gisakura',
+  'trail-igishigishigi': 'reception-uwinka',
+  'trail-buhoro': 'reception-uwinka',
+  'trail-umuyove': 'reception-uwinka',
+  'trail-imbaraga': 'reception-uwinka',
+  'trail-irebero': 'reception-uwinka',
+  'trail-umugote': 'reception-uwinka',
+  'trail-rukuzi': 'reception-uwinka',
   'trail-uwinka': 'reception-uwinka',
   'trail-kamiranzovu': 'reception-uwinka',
   'trail-karamba': 'reception-uwinka',
