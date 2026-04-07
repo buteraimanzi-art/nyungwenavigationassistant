@@ -13,6 +13,7 @@ interface LeafletTrailMapProps {
   trail: Trail;
   userLocation: UserLocation | null;
   showDirections?: boolean;
+  chosenReception?: Reception | null;
   onSelectAttraction?: (a: Attraction) => void;
   onSelectRestArea?: (r: RestArea) => void;
 }
