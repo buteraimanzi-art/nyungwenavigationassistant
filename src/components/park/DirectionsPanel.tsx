@@ -158,16 +158,10 @@ export function DirectionsPanel({ trail, userLocation, onStartDirections, onClos
 
       {/* Action buttons */}
       <div className="flex gap-2">
-        {!isActive ? (
-          <Button className="flex-1 gap-2" onClick={() => onStartDirections(selectedReception)}>
-            <Navigation className="w-4 h-4" />
-            Show Directions on Map
-          </Button>
-        ) : (
-          <Button variant="secondary" className="flex-1 gap-2" onClick={onClose}>
-            Hide Directions
-          </Button>
-        )}
+        <Button className="flex-1 gap-2 h-12 text-base font-bold" onClick={() => onStartDirections(selectedReception)}>
+          <Navigation className="w-5 h-5" />
+          GO — Start Navigation
+        </Button>
       </div>
     </div>
   );

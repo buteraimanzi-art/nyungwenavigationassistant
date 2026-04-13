@@ -1,12 +1,14 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { ParkHeader } from '@/components/park/ParkHeader';
 import { LeafletTrailMap } from '@/components/park/LeafletTrailMap';
 import { TrailInfoPanel } from '@/components/park/TrailInfoPanel';
 import { TrailSelector, CurrentTrailBadge } from '@/components/park/TrailSelector';
 import { DirectionsPanel } from '@/components/park/DirectionsPanel';
+import { NavigationPanel } from '@/components/park/NavigationPanel';
 import { EmergencySOS } from '@/components/park/EmergencySOS';
 import { trails, calculateTrailProgress } from '@/lib/trail-data';
 import { useDemoLocation } from '@/hooks/use-location';
+import { generateRoute, type NavStep } from '@/lib/navigation';
 import type { Trail, Attraction, RestArea } from '@/lib/types';
 import type { Reception } from '@/lib/receptions';
 import { Button } from '@/components/ui/button';
@@ -23,8 +25,14 @@ export default function Index() {
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const [showDirections, setShowDirections] = useState(false);
   const [chosenReception, setChosenReception] = useState<Reception | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
 
-  const { location: userLocation } = useDemoLocation();
+  const { location: userLocation, followRoute } = useDemoLocation();
+
+  const navSteps = useMemo(() => {
+    if (!isNavigating || !chosenReception || !selectedTrail) return null;
+    return generateRoute(chosenReception, selectedTrail.startPoint);
+  }, [isNavigating, chosenReception, selectedTrail]);
 
   const trailProgress = useMemo(() => {
     if (!selectedTrail || !userLocation || selectedTrail.path.length < 2) return null;
@@ -36,6 +44,7 @@ export default function Index() {
     setShowTrailSelector(false);
     setShowDirections(false);
     setChosenReception(null);
+    setIsNavigating(false);
   };
 
   const handleBackToTrails = () => {
@@ -43,7 +52,45 @@ export default function Index() {
     setShowTrailSelector(true);
     setShowDirections(false);
     setChosenReception(null);
+    setIsNavigating(false);
   };
+
+  const handleStartNavigation = useCallback((reception: Reception) => {
+    if (!selectedTrail) return;
+    setChosenReception(reception);
+    setShowDirections(true);
+    setIsNavigating(true);
+    // Make the demo walker follow the generated route
+    const steps = generateRoute(reception, selectedTrail.startPoint);
+    followRoute(steps.map(s => s.coordinate));
+  }, [selectedTrail, followRoute]);
+
+  const handleStopNavigation = () => {
+    setIsNavigating(false);
+    setShowDirections(false);
+  };
+
+  const sideContent = selectedTrail && (
+    <div className="space-y-4">
+      {isNavigating && chosenReception ? (
+        <NavigationPanel
+          trail={selectedTrail}
+          reception={chosenReception}
+          userLocation={userLocation}
+          onStop={handleStopNavigation}
+        />
+      ) : (
+        <DirectionsPanel
+          trail={selectedTrail}
+          userLocation={userLocation}
+          isActive={showDirections}
+          onStartDirections={handleStartNavigation}
+          onClose={() => setShowDirections(false)}
+        />
+      )}
+      <TrailInfoPanel trail={selectedTrail} progress={trailProgress} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} />
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -90,20 +137,12 @@ export default function Index() {
                   {userLocation && <Badge variant="outline" className="gap-1"><div className="w-2 h-2 rounded-full bg-forest-canopy animate-pulse" />GPS Active</Badge>}
                 </div>
               </div>
-              <div className="p-4 space-y-4">
-                {/* Directions panel */}
-                <DirectionsPanel
-                  trail={selectedTrail}
-                  userLocation={userLocation}
-                  isActive={showDirections}
-                  onStartDirections={(reception) => { setChosenReception(reception); setShowDirections(true); }}
-                  onClose={() => setShowDirections(false)}
-                />
-                <TrailInfoPanel trail={selectedTrail} progress={trailProgress} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} />
+              <div className="p-4">
+                {sideContent}
               </div>
             </aside>
             <main className="flex-1 relative">
-              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} />
+              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} />
               {(selectedAttraction || selectedRestArea) && (
                 <div className="absolute top-4 left-4 right-4 max-w-sm z-20">
                   <Card className="shadow-lg">
@@ -130,23 +169,14 @@ export default function Index() {
               {userLocation && <Badge variant="outline" className="gap-1"><div className="w-2 h-2 rounded-full bg-forest-canopy animate-pulse" />GPS</Badge>}
             </div>
             <div className="flex-1 relative">
-              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} />
+              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} />
             </div>
-            <div className={`absolute left-0 right-0 bottom-0 bg-card border-t border-border rounded-t-2xl shadow-lg transition-all duration-300 ${isBottomSheetExpanded ? 'h-[70vh]' : 'h-[220px]'}`}>
+            <div className={`absolute left-0 right-0 bottom-0 bg-card border-t border-border rounded-t-2xl shadow-lg transition-all duration-300 ${isBottomSheetExpanded ? 'h-[70vh]' : 'h-[260px]'}`}>
               <button className="w-full flex justify-center py-2" onClick={() => setIsBottomSheetExpanded(!isBottomSheetExpanded)}>
                 <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
               </button>
               <div className="overflow-y-auto px-4 pb-24" style={{ height: 'calc(100% - 32px)' }}>
-                <DirectionsPanel
-                  trail={selectedTrail}
-                  userLocation={userLocation}
-                  isActive={showDirections}
-                  onStartDirections={(reception) => { setChosenReception(reception); setShowDirections(true); }}
-                  onClose={() => setShowDirections(false)}
-                />
-                <div className="mt-4">
-                  <TrailInfoPanel trail={selectedTrail} progress={trailProgress} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} />
-                </div>
+                {sideContent}
               </div>
             </div>
             <EmergencySOS userLocation={userLocation} trailId={selectedTrail.id} trailName={selectedTrail.name} />
