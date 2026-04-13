@@ -117,22 +117,41 @@ export function LeafletTrailMap({ trail, userLocation, showDirections, chosenRec
       .bindPopup(`<strong>${trail.name}</strong><br/><span style="font-size:12px;">Trail start point</span>`)
       .addTo(layerGroup);
 
+    // Direction overlays: user → reception → trail start
     if (activeReception) {
+      // Line from reception to trail start (orange dashed)
       L.polyline(
         [
           [activeReception.coordinates.lat, activeReception.coordinates.lng],
           [trail.startPoint.lat, trail.startPoint.lng],
         ],
-        {
-          color: '#ea580c',
-          weight: 4,
-          opacity: 0.85,
-          dashArray: '12 8',
-        }
+        { color: '#ea580c', weight: 4, opacity: 0.85, dashArray: '12 8' }
       ).addTo(layerGroup);
+
+      // If user location exists, draw line from user to reception (blue dashed)
+      if (userLocation && isFinite(userLocation.lat) && isFinite(userLocation.lng)) {
+        L.polyline(
+          [
+            [userLocation.lat, userLocation.lng],
+            [activeReception.coordinates.lat, activeReception.coordinates.lng],
+          ],
+          { color: '#2563eb', weight: 3, opacity: 0.7, dashArray: '6 6' }
+        ).addTo(layerGroup);
+      }
+
+      // Fit map to show the full route
+      const bounds = L.latLngBounds([
+        [activeReception.coordinates.lat, activeReception.coordinates.lng],
+        [trail.startPoint.lat, trail.startPoint.lng],
+      ]);
+      if (userLocation && isFinite(userLocation.lat) && isFinite(userLocation.lng)) {
+        bounds.extend([userLocation.lat, userLocation.lng]);
+      }
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
     }
 
-    if (userLocation) {
+    // User location marker
+    if (userLocation && isFinite(userLocation.lat) && isFinite(userLocation.lng)) {
       L.circle([userLocation.lat, userLocation.lng], {
         radius: userLocation.accuracy,
         color: '#2563eb',
@@ -151,10 +170,11 @@ export function LeafletTrailMap({ trail, userLocation, showDirections, chosenRec
         `)
         .addTo(layerGroup);
 
-      if (isFinite(userLocation.lat) && isFinite(userLocation.lng)) {
+      // Only auto-center on user when directions aren't active
+      if (!activeReception) {
         map.setView([userLocation.lat, userLocation.lng], 13);
       }
-    } else {
+    } else if (!activeReception) {
       map.setView(PARK_CENTER, PARK_ZOOM);
     }
   }, [activeReception, roadPaths, trail, trailPaths, userLocation]);

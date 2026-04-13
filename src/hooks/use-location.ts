@@ -50,20 +50,45 @@ export function useLocation(): UseLocationReturn {
   return { location, error, isLoading, isSupported, refresh };
 }
 
+// Demo location that simulates a hiker walking near Uwinka reception area
+// Starts near Uwinka and slowly moves along trails in the park
 export function useDemoLocation(): UseLocationReturn {
+  // Start near Uwinka reception (-2.4625, 29.198) — the central hub
   const [location, setLocation] = useState<UserLocation>({
-    lat: -2.475, lng: 29.20, accuracy: 15, timestamp: Date.now(), heading: 0, speed: 1.0
+    lat: -2.464, lng: 29.195, accuracy: 12, timestamp: Date.now(), heading: 45, speed: 0.8
   });
 
   useEffect(() => {
+    // Simulate walking along a trail path near Uwinka
+    let step = 0;
     const interval = setInterval(() => {
+      step++;
       setLocation(prev => {
-        const newLat = Math.max(-2.50, Math.min(-2.38, prev.lat - 0.0008 + (Math.random() - 0.5) * 0.0003));
-        const newLng = Math.max(29.08, Math.min(29.42, prev.lng + (Math.random() - 0.4) * 0.0004));
+        // Gentle walk along a realistic path near the trails
+        // Moves slowly south-east then curves back, staying inside the park
+        const phase = (step % 60) / 60; // 0→1 cycle every ~2.5 min
+        const angle = phase * Math.PI * 2;
+        
+        // Wander within ~1km of Uwinka area
+        const baseLat = -2.4625;
+        const baseLng = 29.198;
+        const wanderLat = Math.sin(angle) * 0.004 + Math.cos(angle * 0.7) * 0.002;
+        const wanderLng = Math.cos(angle) * 0.005 + Math.sin(angle * 1.3) * 0.002;
+        
+        const newLat = baseLat + wanderLat;
+        const newLng = baseLng + wanderLng;
+        
         const heading = Math.atan2(newLng - prev.lng, prev.lat - newLat) * (180 / Math.PI);
-        return { ...prev, lat: newLat, lng: newLng, timestamp: Date.now(), heading: (heading + 360) % 360, speed: 0.8 + Math.random() * 0.6, accuracy: 10 + Math.random() * 10 };
+        return {
+          lat: newLat,
+          lng: newLng,
+          timestamp: Date.now(),
+          heading: (heading + 360) % 360,
+          speed: 0.6 + Math.random() * 0.8,
+          accuracy: 8 + Math.random() * 8,
+        };
       });
-    }, 2500);
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
 
