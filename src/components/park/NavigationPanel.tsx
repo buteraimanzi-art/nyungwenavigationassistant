@@ -34,26 +34,26 @@ export function NavigationPanel({ trail, reception, userLocation, onStop }: Navi
 
   return (
     <div className="space-y-3">
-      {/* Main direction card – Komoot-style big instruction */}
-      <Card className="border-primary bg-primary/5 overflow-hidden">
-        <div className="bg-primary px-4 py-2 flex items-center justify-between">
+      {/* Main direction card – Komoot style */}
+      <Card className="border-komoot-olive overflow-hidden rounded-xl shadow-lg">
+        <div className="bg-komoot-olive px-4 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2 text-primary-foreground">
             <Navigation className="w-4 h-4" />
-            <span className="text-sm font-semibold">Navigation Active</span>
+            <span className="text-sm font-bold tracking-wide">Navigation Active</span>
           </div>
-          <Button variant="ghost" size="icon" className="h-7 w-7 text-primary-foreground hover:bg-primary-foreground/20" onClick={onStop}>
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-primary-foreground hover:bg-primary-foreground/20 rounded-full" onClick={onStop}>
             <X className="w-4 h-4" />
           </Button>
         </div>
         <CardContent className="p-0">
           {/* Big current instruction */}
-          <div className="px-5 py-6 flex items-center gap-4">
+          <div className="px-5 py-6 flex items-center gap-4 bg-komoot-olive/5">
             <div className="text-5xl shrink-0">{getDirectionIcon(currentStep.direction)}</div>
             <div className="flex-1 min-w-0">
               <p className="text-lg font-bold text-foreground leading-tight">{currentStep.instruction}</p>
               {nextStep && (
-                <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
-                  <span>Then:</span>
+                <p className="text-sm text-muted-foreground mt-1.5 flex items-center gap-1">
+                  <span className="text-xs uppercase tracking-wider font-medium">Then:</span>
                   <span>{getDirectionIcon(nextStep.direction)}</span>
                   <span className="truncate">{nextStep.instruction}</span>
                 </p>
@@ -62,9 +62,9 @@ export function NavigationPanel({ trail, reception, userLocation, onStop }: Navi
           </div>
 
           {/* Progress bar */}
-          <div className="px-5 pb-4 space-y-1.5">
+          <div className="px-5 pb-4 pt-3 space-y-2">
             <Progress value={progress} className="h-2" />
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <div className="flex justify-between text-xs text-muted-foreground font-medium">
               <span>{formatDist(currentStep.cumulativeDistance)} covered</span>
               <span>{formatDist(totalDist - currentStep.cumulativeDistance)} remaining</span>
             </div>
@@ -73,24 +73,24 @@ export function NavigationPanel({ trail, reception, userLocation, onStop }: Navi
       </Card>
 
       {/* Route info */}
-      <Card>
+      <Card className="rounded-xl">
         <CardContent className="p-3">
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
             <MapPin className="w-3 h-3" />
             <span>{reception.name}</span>
             <ChevronRight className="w-3 h-3" />
-            <span className="font-medium text-foreground">{trail.name}</span>
+            <span className="font-semibold text-foreground">{trail.name}</span>
           </div>
           <div className="flex gap-2">
-            <Badge variant="secondary" className="text-xs">{formatDist(totalDist)} total</Badge>
-            <Badge variant="secondary" className="text-xs">{steps.length} steps</Badge>
-            <Badge variant="outline" className="text-xs">Step {currentStepIdx + 1}/{steps.length}</Badge>
+            <Badge className="text-xs rounded-full bg-komoot-olive/10 text-komoot-olive border-komoot-olive/20" variant="outline">{formatDist(totalDist)} total</Badge>
+            <Badge variant="secondary" className="text-xs rounded-full">{steps.length} steps</Badge>
+            <Badge variant="outline" className="text-xs rounded-full">Step {currentStepIdx + 1}/{steps.length}</Badge>
           </div>
         </CardContent>
       </Card>
 
       {/* Step list */}
-      <Card>
+      <Card className="rounded-xl">
         <CardContent className="p-0 max-h-[200px] overflow-y-auto">
           {steps.map((step, i) => (
             <StepRow key={step.id} step={step} isCurrent={i === currentStepIdx} isPast={i < currentStepIdx} />
@@ -104,16 +104,16 @@ export function NavigationPanel({ trail, reception, userLocation, onStop }: Navi
 function StepRow({ step, isCurrent, isPast }: { step: NavStep; isCurrent: boolean; isPast: boolean }) {
   return (
     <div className={`flex items-center gap-3 px-4 py-2.5 border-b border-border last:border-b-0 transition-colors ${
-      isCurrent ? 'bg-primary/10' : isPast ? 'opacity-50' : ''
+      isCurrent ? 'bg-komoot-olive/10' : isPast ? 'opacity-40' : ''
     }`}>
       <span className="text-xl shrink-0">{getDirectionIcon(step.direction)}</span>
       <div className="flex-1 min-w-0">
-        <p className={`text-sm ${isCurrent ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
+        <p className={`text-sm ${isCurrent ? 'font-bold text-foreground' : 'text-muted-foreground'}`}>
           {step.instruction}
         </p>
       </div>
       {step.distanceFromPrev > 0 && (
-        <span className="text-xs text-muted-foreground shrink-0">{formatDist(step.distanceFromPrev)}</span>
+        <span className="text-xs text-muted-foreground shrink-0 font-medium">{formatDist(step.distanceFromPrev)}</span>
       )}
     </div>
   );

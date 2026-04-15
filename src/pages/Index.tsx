@@ -14,7 +14,7 @@ import type { Reception } from '@/lib/receptions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TreePine, MapPin, Navigation, ArrowLeft, X } from 'lucide-react';
+import { MapPin, Navigation, ArrowLeft, X } from 'lucide-react';
 import nyungweHero from '@/assets/nyungwe-hero.jpg';
 
 export default function Index() {
@@ -60,7 +60,6 @@ export default function Index() {
     setChosenReception(reception);
     setShowDirections(true);
     setIsNavigating(true);
-    // Make the demo walker follow the generated route
     const steps = generateRoute(reception, selectedTrail.startPoint);
     followRoute(steps.map(s => s.coordinate));
   }, [selectedTrail, followRoute]);
@@ -97,44 +96,72 @@ export default function Index() {
       <ParkHeader />
 
       {showTrailSelector ? (
-        <main className="flex-1 container max-w-4xl mx-auto px-4 py-6">
-          <div className="relative rounded-2xl overflow-hidden mb-8 border border-border">
+        <main className="flex-1 flex flex-col">
+          {/* Komoot-style full-bleed hero */}
+          <div className="relative h-[70vh] min-h-[480px] flex items-center justify-center overflow-hidden">
             <div className="absolute inset-0">
-              <img src={nyungweHero} alt="" className="w-full h-full object-cover opacity-20" />
+              <img src={nyungweHero} alt="" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-b from-komoot-header/60 via-komoot-header/30 to-komoot-header/70" />
             </div>
-            <div className="relative p-6 md:p-8 bg-gradient-to-r from-background/95 to-background/80">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
-                  <TreePine className="w-7 h-7 text-primary-foreground" />
-                </div>
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground">Nyungwe National Park</h1>
-                  <p className="text-muted-foreground">Trail Tracker &amp; Explorer</p>
-                </div>
-              </div>
-              <p className="text-muted-foreground max-w-2xl leading-relaxed">
-                Explore one of Africa's oldest rainforests with the official park map you uploaded.
-                Trail names and distances are now matched to that source.
+            <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
+              <h1 className="text-5xl md:text-7xl font-bold text-primary-foreground leading-tight tracking-tight mb-6">
+                Explore beyond the map
+              </h1>
+              <p className="text-lg md:text-xl text-primary-foreground/80 mb-8 uppercase tracking-[0.2em] text-sm font-medium">
+                Where will you explore next?
               </p>
-              <div className="flex flex-wrap gap-3 mt-4">
-                <Badge variant="secondary" className="gap-1"><MapPin className="w-3 h-3" />Rwanda, Southwest</Badge>
-                <Badge variant="secondary" className="gap-1"><TreePine className="w-3 h-3" />1,019 km² Rainforest</Badge>
-                <Badge variant="secondary" className="gap-1"><Navigation className="w-3 h-3" />3 Receptions</Badge>
+              <div className="flex items-center justify-center gap-4">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="rounded-full border-primary-foreground/50 text-primary-foreground bg-transparent hover:bg-primary-foreground/10 px-8 font-semibold"
+                  onClick={() => document.getElementById('trails')?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  Browse Routes
+                </Button>
+                <Button
+                  size="lg"
+                  className="rounded-full bg-komoot-header text-komoot-header-foreground hover:bg-komoot-header/90 px-8 font-semibold"
+                >
+                  Plan a Route
+                </Button>
               </div>
             </div>
           </div>
 
-          <TrailSelector trails={trails} selectedTrailId={selectedTrail?.id} onSelectTrail={handleSelectTrail} />
+          {/* Komoot-style beige section with trail cards */}
+          <div id="trails" className="bg-komoot-beige py-12 flex-1">
+            <div className="container max-w-5xl mx-auto px-4">
+              <div className="mb-8">
+                <p className="uppercase tracking-[0.15em] text-xs font-semibold text-muted-foreground mb-2">
+                  Choose your tour, download it to your smartphone
+                </p>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-3xl font-bold text-foreground">Ready for your next adventure?</h2>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="gap-1"><MapPin className="w-3 h-3" />{trails.length} routes</Badge>
+                  </div>
+                </div>
+              </div>
+              <TrailSelector trails={trails} selectedTrailId={selectedTrail?.id} onSelectTrail={handleSelectTrail} />
+            </div>
+          </div>
         </main>
       ) : selectedTrail ? (
         <>
-          {/* Desktop */}
+          {/* Desktop – Komoot planner layout */}
           <div className="hidden md:flex flex-1 overflow-hidden">
             <aside className="w-[400px] border-r border-border bg-card overflow-y-auto">
               <div className="p-4 border-b border-border sticky top-0 bg-card z-10">
                 <div className="flex items-center justify-between">
-                  <Button variant="ghost" size="sm" onClick={handleBackToTrails} className="gap-1"><ArrowLeft className="w-4 h-4" />All Trails</Button>
-                  {userLocation && <Badge variant="outline" className="gap-1"><div className="w-2 h-2 rounded-full bg-forest-canopy animate-pulse" />GPS Active</Badge>}
+                  <Button variant="ghost" size="sm" onClick={handleBackToTrails} className="gap-1 text-muted-foreground hover:text-foreground">
+                    <ArrowLeft className="w-4 h-4" />All Routes
+                  </Button>
+                  {userLocation && (
+                    <Badge variant="outline" className="gap-1 border-komoot-olive text-komoot-olive">
+                      <div className="w-2 h-2 rounded-full bg-komoot-olive animate-pulse" />GPS Active
+                    </Badge>
+                  )}
                 </div>
               </div>
               <div className="p-4">
@@ -145,7 +172,7 @@ export default function Index() {
               <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} />
               {(selectedAttraction || selectedRestArea) && (
                 <div className="absolute top-4 left-4 right-4 max-w-sm z-20">
-                  <Card className="shadow-lg">
+                  <Card className="shadow-lg border-none">
                     <CardHeader className="pb-2 flex flex-row items-start justify-between">
                       <div><CardTitle className="text-base">{selectedAttraction?.name || selectedRestArea?.name}</CardTitle><p className="text-sm text-muted-foreground capitalize">{selectedAttraction?.type || selectedRestArea?.type}</p></div>
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setSelectedAttraction(null); setSelectedRestArea(null); }}><X className="w-4 h-4" /></Button>
@@ -166,7 +193,7 @@ export default function Index() {
             <div className="p-3 border-b border-border bg-card flex items-center justify-between">
               <Button variant="ghost" size="sm" onClick={handleBackToTrails} className="gap-1 -ml-2"><ArrowLeft className="w-4 h-4" /></Button>
               <CurrentTrailBadge trail={selectedTrail} />
-              {userLocation && <Badge variant="outline" className="gap-1"><div className="w-2 h-2 rounded-full bg-forest-canopy animate-pulse" />GPS</Badge>}
+              {userLocation && <Badge variant="outline" className="gap-1 border-komoot-olive text-komoot-olive"><div className="w-2 h-2 rounded-full bg-komoot-olive animate-pulse" />GPS</Badge>}
             </div>
             <div className="flex-1 relative">
               <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} />

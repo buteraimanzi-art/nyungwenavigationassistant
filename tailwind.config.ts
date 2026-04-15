@@ -57,6 +57,13 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        komoot: {
+          header: "hsl(var(--komoot-header))",
+          "header-foreground": "hsl(var(--komoot-header-foreground))",
+          beige: "hsl(var(--komoot-beige))",
+          olive: "hsl(var(--komoot-olive))",
+          brown: "hsl(var(--komoot-brown))",
+        },
         forest: {
           deep: "hsl(var(--forest-deep))",
           canopy: "hsl(var(--forest-canopy))",
