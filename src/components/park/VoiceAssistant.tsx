@@ -26,7 +26,7 @@ const RESPONSES: Record<string, (trail: Trail | null, progress: TrailProgress | 
     if (progress) return `You've covered ${progress.percentComplete}% of the trail. About ${Math.round(progress.distanceRemaining)} meters remaining.`;
     return 'Start a trail to track your progress.';
   },
-  'help': () => 'You can ask me about rest areas, nearby attractions, trail progress, or directions. Try saying "rest areas" or "attractions nearby".',
+  'help': (_trail: Trail | null, _progress: TrailProgress | null) => 'You can ask me about rest areas, nearby attractions, trail progress, or directions. Try saying "rest areas" or "attractions nearby".',
 };
 
 export function VoiceAssistant({ trail, userLocation, progress, isNavigating }: Props) {
