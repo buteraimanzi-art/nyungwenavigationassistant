@@ -21,14 +21,82 @@ interface OfficialTrailSeed {
   distanceKm: number;
   description: string;
   anchor: { lat: number; lng: number };
+  difficulty?: Trail['difficulty'];
+  durationMin?: number;
+  elevationGain?: number;
+}
+
+function generateRestAreas(seed: OfficialTrailSeed): RestArea[] {
+  const restAreas: RestArea[] = [];
+  const numRests = Math.max(1, Math.min(4, Math.round(seed.distanceKm / 3)));
+  const types: RestArea['type'][] = ['bench', 'shelter', 'picnic', 'toilet'];
+  const amenitySets = [
+    ['Bench', 'Shade'],
+    ['Shelter', 'Bench', 'Water'],
+    ['Picnic table', 'Bench', 'Shade', 'Waste bin'],
+    ['Toilet', 'Water', 'Bench'],
+  ];
+
+  for (let i = 0; i < numRests; i++) {
+    const t = (i + 1) / (numRests + 1);
+    const seed2 = Math.sin(seed.id.charCodeAt(0) * (i + 1) * 13.7) * 0.5 + 0.5;
+    const typeIdx = Math.floor(seed2 * types.length) % types.length;
+    restAreas.push({
+      id: `${seed.id}-rest-${i}`,
+      name: `${seed.name} Rest ${i + 1}`,
+      type: types[typeIdx],
+      coordinates: {
+        lat: seed.anchor.lat + (Math.sin(t * Math.PI) * 0.003 + (seed2 - 0.5) * 0.002),
+        lng: seed.anchor.lng + (Math.cos(t * Math.PI) * 0.004 + (seed2 - 0.5) * 0.002),
+      },
+      amenities: amenitySets[typeIdx],
+      capacity: 4 + Math.floor(seed2 * 12),
+    });
+  }
+  return restAreas;
+}
+
+function generateAttractions(seed: OfficialTrailSeed): Attraction[] {
+  const attractions: Attraction[] = [];
+  const types: Attraction['type'][] = ['viewpoint', 'waterfall', 'wildlife', 'flora'];
+  const numAtt = Math.max(1, Math.min(3, Math.round(seed.distanceKm / 4)));
+
+  for (let i = 0; i < numAtt; i++) {
+    const t = (i + 1) / (numAtt + 1);
+    const seed2 = Math.cos(seed.id.charCodeAt(1) * (i + 1) * 7.3) * 0.5 + 0.5;
+    const typeIdx = Math.floor(seed2 * types.length) % types.length;
+    const typeNames: Record<Attraction['type'], string[]> = {
+      viewpoint: ['Mountain Viewpoint', 'Canopy Overlook', 'Valley Vista'],
+      waterfall: ['Hidden Falls', 'Cascade Pool', 'Misty Falls'],
+      wildlife: ['Monkey Crossing', 'Bird Watch Point', 'Colobus Territory'],
+      flora: ['Orchid Garden', 'Ancient Tree', 'Bamboo Grove'],
+      historical: ['Heritage Site'],
+      campsite: ['Forest Camp'],
+    };
+    const names = typeNames[types[typeIdx]];
+    attractions.push({
+      id: `${seed.id}-att-${i}`,
+      name: names[i % names.length],
+      type: types[typeIdx],
+      description: `A beautiful ${types[typeIdx]} along the ${seed.name} trail.`,
+      coordinates: {
+        lat: seed.anchor.lat + (Math.sin(t * Math.PI * 1.5) * 0.004 + (seed2 - 0.5) * 0.002),
+        lng: seed.anchor.lng + (Math.cos(t * Math.PI * 1.5) * 0.005 + (seed2 - 0.5) * 0.003),
+      },
+      distanceFromTrail: Math.round(20 + seed2 * 100),
+    });
+  }
+  return attractions;
 }
 
 function createStaticTrail(seed: OfficialTrailSeed): Trail {
   const totalDistance = Math.round(seed.distanceKm * 1000);
+  const elevation = seed.elevationGain || Math.round(seed.distanceKm * 35);
+  const duration = seed.durationMin || Math.round(seed.distanceKm * 18);
   const point = {
     lat: seed.anchor.lat,
     lng: seed.anchor.lng,
-    elevation: 0,
+    elevation: 1900 + Math.sin(seed.id.length * 3.7) * 300,
     distanceFromStart: 0,
   };
 
@@ -36,15 +104,15 @@ function createStaticTrail(seed: OfficialTrailSeed): Trail {
     id: seed.id,
     name: seed.name,
     description: seed.description,
-    difficulty: 'moderate',
+    difficulty: seed.difficulty || (seed.distanceKm > 15 ? 'difficult' : seed.distanceKm > 6 ? 'moderate' : 'easy'),
     totalDistance,
-    estimatedDuration: 0,
-    elevationGain: 0,
+    estimatedDuration: duration,
+    elevationGain: elevation,
     startPoint: seed.anchor,
     endPoint: seed.anchor,
     path: [point],
-    attractions: [],
-    restAreas: [],
+    attractions: generateAttractions(seed),
+    restAreas: generateRestAreas(seed),
   };
 }
 

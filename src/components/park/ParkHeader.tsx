@@ -1,45 +1,50 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { TreePine, Menu, User, Map, X, Smartphone } from 'lucide-react';
+import { Menu, User, Map, X, Smartphone } from 'lucide-react';
+import nyungweLogo from '@/assets/nyungwe-logo.webp';
+
+const navLinks = [
+  { to: '/', label: 'Routes' },
+  { to: '/planner', label: 'Planner' },
+  { to: '/features', label: 'Features' },
+  { to: '/updates', label: 'Updates' },
+];
 
 export function ParkHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
   return (
     <header className="sticky top-0 z-40 w-full bg-komoot-header">
       <div className="container flex h-14 items-center justify-between px-4">
-        {/* Logo – Komoot style mountain icon */}
         <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-komoot-olive flex items-center justify-center">
-            <TreePine className="w-5 h-5 text-primary-foreground" />
-          </div>
+          <img src={nyungweLogo} alt="Nyungwe" className="w-9 h-9 rounded-full object-cover" />
           <span className="hidden sm:inline font-bold text-lg tracking-tight text-komoot-header-foreground">
             Nyungwe
           </span>
         </Link>
 
-        {/* Desktop nav – Komoot style */}
         <nav className="hidden md:flex items-center gap-8">
-          <Link to="/" className="text-sm font-medium text-komoot-header-foreground/80 hover:text-komoot-header-foreground transition-colors">
-            Routes
-          </Link>
-          <span className="text-sm font-medium text-komoot-header-foreground/80 hover:text-komoot-header-foreground transition-colors cursor-pointer">
-            Planner
-          </span>
-          <span className="text-sm font-medium text-komoot-header-foreground/80 hover:text-komoot-header-foreground transition-colors cursor-pointer">
-            Features
-          </span>
-          <span className="text-sm font-medium text-komoot-header-foreground/80 hover:text-komoot-header-foreground transition-colors cursor-pointer">
-            Updates
-          </span>
+          {navLinks.map(link => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`text-sm font-medium transition-colors ${
+                location.pathname === link.to
+                  ? 'text-komoot-header-foreground border-b-2 border-komoot-header-foreground pb-0.5'
+                  : 'text-komoot-header-foreground/70 hover:text-komoot-header-foreground'
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
-        {/* Right side – Komoot style buttons */}
         <div className="flex items-center gap-3">
           <Button
             variant="outline"
@@ -79,26 +84,23 @@ export function ParkHeader() {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-komoot-header border-t border-komoot-header-foreground/10">
           <nav className="container flex flex-col py-3 px-4 space-y-1">
-            <Link
-              to="/"
-              className="px-3 py-2.5 text-sm font-medium text-komoot-header-foreground rounded-md hover:bg-komoot-header-foreground/10"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Routes
-            </Link>
-            <span className="px-3 py-2.5 text-sm font-medium text-komoot-header-foreground/70 rounded-md hover:bg-komoot-header-foreground/10 cursor-pointer">
-              Planner
-            </span>
-            <span className="px-3 py-2.5 text-sm font-medium text-komoot-header-foreground/70 rounded-md hover:bg-komoot-header-foreground/10 cursor-pointer">
-              Features
-            </span>
-            <span className="px-3 py-2.5 text-sm font-medium text-komoot-header-foreground/70 rounded-md hover:bg-komoot-header-foreground/10 cursor-pointer">
-              Updates
-            </span>
+            {navLinks.map(link => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`px-3 py-2.5 text-sm font-medium rounded-md ${
+                  location.pathname === link.to
+                    ? 'text-komoot-header-foreground bg-komoot-header-foreground/10'
+                    : 'text-komoot-header-foreground/70 hover:bg-komoot-header-foreground/10'
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
         </div>
       )}
