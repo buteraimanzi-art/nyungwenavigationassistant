@@ -55,7 +55,7 @@ export function VoiceAssistant({ trail, userLocation, progress, isNavigating }: 
     } else if (q.includes('progress') || q.includes('far') || q.includes('remain') || q.includes('distance')) {
       answer = RESPONSES['progress'](trail, progress);
     } else {
-      answer = RESPONSES['help']();
+      answer = RESPONSES['help'](trail, progress);
     }
     setResponse(answer);
     speak(answer);
