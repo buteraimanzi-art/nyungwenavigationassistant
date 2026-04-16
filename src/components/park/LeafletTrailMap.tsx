@@ -1,14 +1,21 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { Trail, UserLocation, Attraction, RestArea } from '@/lib/types';
 import { TRAIL_GPS_PATHS } from '@/lib/trail-gps-paths';
 import { RECEPTIONS, type Reception } from '@/lib/receptions';
 import type { NavStep } from '@/lib/navigation';
+import { MapLayerToggle, type MapLayer } from './MapLayerToggle';
 
 const PARK_CENTER: [number, number] = [-2.45, 29.25];
 const PARK_ZOOM = 12;
 const RWANDA_BOUNDS: L.LatLngBoundsExpression = [[-2.85, 28.85], [-1.05, 30.9]];
+
+const TILE_URLS: Record<MapLayer, { url: string; attr: string }> = {
+  street: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attr: '&copy; OpenStreetMap' },
+  satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: '&copy; Esri' },
+  terrain: { url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', attr: '&copy; OpenTopoMap' },
+};
 
 interface LeafletTrailMapProps {
   trail: Trail;
@@ -35,6 +42,7 @@ const activeReceptionIcon = createDivIcon('R', '#ea580c', 38);
 const activeHqIcon = createDivIcon('HQ', '#ea580c', 42);
 const trailStartIcon = createDivIcon('T', '#0f766e', 30);
 const userIcon = createDivIcon('•', '#2563eb', 20);
+const restIcon = createDivIcon('🪑', '#0284c7', 24);
 
 function createStepIcon(num: number, isActive: boolean) {
   const bg = isActive ? '#2563eb' : '#6b7280';
@@ -51,6 +59,8 @@ export function LeafletTrailMap({ trail, userLocation, showDirections, chosenRec
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerGroupRef = useRef<L.LayerGroup | null>(null);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
+  const [mapLayer, setMapLayer] = useState<MapLayer>('street');
 
   const trailPaths = useMemo(() => TRAIL_GPS_PATHS.filter((p) => p.category === 'trail'), []);
   const roadPaths = useMemo(() => TRAIL_GPS_PATHS.filter((p) => p.category === 'road'), []);
@@ -58,46 +68,40 @@ export function LeafletTrailMap({ trail, userLocation, showDirections, chosenRec
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-
     const map = L.map(containerRef.current, {
-      center: PARK_CENTER,
-      zoom: PARK_ZOOM,
-      minZoom: 8,
-      maxZoom: 18,
-      maxBounds: RWANDA_BOUNDS,
-      zoomControl: true,
+      center: PARK_CENTER, zoom: PARK_ZOOM, minZoom: 8, maxZoom: 18,
+      maxBounds: RWANDA_BOUNDS, zoomControl: true,
     });
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(map);
-
+    const tile = TILE_URLS[mapLayer];
+    tileLayerRef.current = L.tileLayer(tile.url, { attribution: tile.attr }).addTo(map);
     layerGroupRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
-
-    return () => {
-      map.remove();
-      mapRef.current = null;
-      layerGroupRef.current = null;
-    };
+    return () => { map.remove(); mapRef.current = null; layerGroupRef.current = null; tileLayerRef.current = null; };
   }, []);
+
+  // Switch tile layer
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    if (tileLayerRef.current) map.removeLayer(tileLayerRef.current);
+    const tile = TILE_URLS[mapLayer];
+    tileLayerRef.current = L.tileLayer(tile.url, { attribution: tile.attr }).addTo(map);
+  }, [mapLayer]);
 
   useEffect(() => {
     const map = mapRef.current;
     const layerGroup = layerGroupRef.current;
     if (!map || !layerGroup) return;
-
     layerGroup.clearLayers();
 
     roadPaths.forEach((path) => {
       L.polyline(path.coords, { color: '#dc2626', weight: 3, opacity: 0.6, dashArray: '8 4' }).addTo(layerGroup);
     });
-
     trailPaths.forEach((path) => {
       L.polyline(path.coords, { color: '#16a34a', weight: 4, opacity: 0.8 }).addTo(layerGroup);
     });
 
-    // Reception markers
+    // Receptions
     RECEPTIONS.forEach((reception) => {
       const isHQ = reception.id === 'reception-gisakura';
       const isActive = activeReception?.id === reception.id;
@@ -105,7 +109,7 @@ export function LeafletTrailMap({ trail, userLocation, showDirections, chosenRec
       if (isActive) icon = isHQ ? activeHqIcon : activeReceptionIcon;
       else icon = isHQ ? hqIcon : receptionIcon;
       L.marker([reception.coordinates.lat, reception.coordinates.lng], { icon })
-        .bindPopup(`<div style="font-size:12px;line-height:1.4;min-width:180px;"><strong>${reception.name}</strong><br/><span>${reception.description}</span>${reception.phone ? `<br/><span>📞 ${reception.phone}</span>` : ''}</div>`)
+        .bindPopup(`<div style="font-size:12px;line-height:1.4;min-width:180px;"><strong>${reception.name}</strong><br/><span>${reception.description}</span>${reception.phone ? `<br/>📞 ${reception.phone}` : ''}</div>`)
         .addTo(layerGroup);
     });
 
@@ -114,85 +118,63 @@ export function LeafletTrailMap({ trail, userLocation, showDirections, chosenRec
       .bindPopup(`<strong>${trail.name}</strong><br/><span style="font-size:12px;">Trail start point</span>`)
       .addTo(layerGroup);
 
-    // Navigation route with step markers
+    // Rest areas on trail
+    trail.restAreas.forEach((ra) => {
+      L.marker([ra.coordinates.lat, ra.coordinates.lng], { icon: restIcon })
+        .bindPopup(`<div style="font-size:12px;"><strong>${ra.name}</strong><br/>${ra.amenities.join(', ')}</div>`)
+        .addTo(layerGroup);
+    });
+
+    // Navigation route
     if (navSteps && navSteps.length > 0 && activeReception) {
       const routeCoords: [number, number][] = navSteps.map(s => [s.coordinate.lat, s.coordinate.lng]);
-
-      // Thick route line
-      L.polyline(routeCoords, {
-        color: '#2563eb',
-        weight: 6,
-        opacity: 0.8,
-      }).addTo(layerGroup);
-
-      // Numbered step markers
+      L.polyline(routeCoords, { color: '#2563eb', weight: 6, opacity: 0.8 }).addTo(layerGroup);
       const currentIdx = userLocation ? findNearestStepIdx(userLocation, navSteps) : 0;
       navSteps.forEach((step, i) => {
-        if (i === 0 || i === navSteps.length - 1) return; // skip start/end (already have markers)
+        if (i === 0 || i === navSteps.length - 1) return;
         const icon = createStepIcon(i, i === currentIdx);
         L.marker([step.coordinate.lat, step.coordinate.lng], { icon })
           .bindPopup(`<div style="font-size:12px;"><strong>Step ${i + 1}</strong><br/>${step.instruction}</div>`)
           .addTo(layerGroup);
       });
-
-      // Fit to route
       const bounds = L.latLngBounds(routeCoords);
-      if (userLocation && isFinite(userLocation.lat) && isFinite(userLocation.lng)) {
-        bounds.extend([userLocation.lat, userLocation.lng]);
-      }
+      if (userLocation && isFinite(userLocation.lat)) bounds.extend([userLocation.lat, userLocation.lng]);
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
     } else if (activeReception) {
-      // Simple direction lines (no navigation started yet)
       L.polyline(
         [[activeReception.coordinates.lat, activeReception.coordinates.lng], [trail.startPoint.lat, trail.startPoint.lng]],
         { color: '#ea580c', weight: 4, opacity: 0.85, dashArray: '12 8' }
       ).addTo(layerGroup);
-
-      if (userLocation && isFinite(userLocation.lat) && isFinite(userLocation.lng)) {
-        L.polyline(
-          [[userLocation.lat, userLocation.lng], [activeReception.coordinates.lat, activeReception.coordinates.lng]],
-          { color: '#2563eb', weight: 3, opacity: 0.7, dashArray: '6 6' }
-        ).addTo(layerGroup);
+      if (userLocation && isFinite(userLocation.lat)) {
+        L.polyline([[userLocation.lat, userLocation.lng], [activeReception.coordinates.lat, activeReception.coordinates.lng]], { color: '#2563eb', weight: 3, opacity: 0.7, dashArray: '6 6' }).addTo(layerGroup);
       }
-
-      const bounds = L.latLngBounds([
-        [activeReception.coordinates.lat, activeReception.coordinates.lng],
-        [trail.startPoint.lat, trail.startPoint.lng],
-      ]);
-      if (userLocation && isFinite(userLocation.lat) && isFinite(userLocation.lng)) {
-        bounds.extend([userLocation.lat, userLocation.lng]);
-      }
+      const bounds = L.latLngBounds([[activeReception.coordinates.lat, activeReception.coordinates.lng], [trail.startPoint.lat, trail.startPoint.lng]]);
+      if (userLocation && isFinite(userLocation.lat)) bounds.extend([userLocation.lat, userLocation.lng]);
       map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
     }
 
-    // User location marker
+    // User location
     if (userLocation && isFinite(userLocation.lat) && isFinite(userLocation.lng)) {
-      L.circle([userLocation.lat, userLocation.lng], {
-        radius: userLocation.accuracy,
-        color: '#2563eb',
-        fillColor: '#2563eb',
-        fillOpacity: 0.12,
-        weight: 1,
-      }).addTo(layerGroup);
-
+      L.circle([userLocation.lat, userLocation.lng], { radius: userLocation.accuracy, color: '#2563eb', fillColor: '#2563eb', fillOpacity: 0.12, weight: 1 }).addTo(layerGroup);
       L.marker([userLocation.lat, userLocation.lng], { icon: userIcon })
-        .bindPopup(`<div style="font-size:12px;line-height:1.4;"><strong>Your Location</strong><br/><span>${userLocation.lat.toFixed(4)}°S, ${userLocation.lng.toFixed(4)}°E</span>${userLocation.speed && userLocation.speed > 0.3 ? `<br/><span>${(userLocation.speed * 3.6).toFixed(1)} km/h</span>` : ''}</div>`)
+        .bindPopup(`<div style="font-size:12px;"><strong>Your Location</strong><br/>${userLocation.lat.toFixed(4)}°S, ${userLocation.lng.toFixed(4)}°E${userLocation.speed && userLocation.speed > 0.3 ? `<br/>${(userLocation.speed * 3.6).toFixed(1)} km/h` : ''}</div>`)
         .addTo(layerGroup);
-
-      if (!activeReception && !navSteps) {
-        map.setView([userLocation.lat, userLocation.lng], 13);
-      }
+      if (!activeReception && !navSteps) map.setView([userLocation.lat, userLocation.lng], 13);
     } else if (!activeReception) {
       map.setView(PARK_CENTER, PARK_ZOOM);
     }
   }, [activeReception, navSteps, roadPaths, trail, trailPaths, userLocation]);
 
-  return <div ref={containerRef} className="relative h-full min-h-[400px] w-full overflow-hidden rounded-lg border border-border bg-muted" />;
+  return (
+    <div className="relative h-full min-h-[400px] w-full overflow-hidden rounded-lg border border-border bg-muted">
+      <div ref={containerRef} className="h-full w-full" />
+      <MapLayerToggle currentLayer={mapLayer} onChange={setMapLayer} />
+    </div>
+  );
 }
 
 function findNearestStepIdx(loc: { lat: number; lng: number }, steps: NavStep[]): number {
-  let minD = Infinity;
-  let idx = 0;
+  let minD = Infinity; let idx = 0;
   for (let i = 0; i < steps.length; i++) {
     const dlat = loc.lat - steps[i].coordinate.lat;
     const dlng = loc.lng - steps[i].coordinate.lng;
