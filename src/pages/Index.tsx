@@ -186,7 +186,7 @@ export default function Index() {
             </aside>
             <main className="flex-1 relative flex flex-col">
               <div className="flex-1 relative">
-                <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} />
+                <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} routeGeometry={routeGeometry} />
                 {(selectedAttraction || selectedRestArea) && (
                   <div className="absolute top-4 left-4 right-4 max-w-sm z-20">
                     <Card className="shadow-lg border-none">
@@ -216,7 +216,7 @@ export default function Index() {
               {userLocation && <Badge variant="outline" className="gap-1 border-komoot-olive text-komoot-olive"><div className="w-2 h-2 rounded-full bg-komoot-olive animate-pulse" />GPS</Badge>}
             </div>
             <div className="flex-1 relative">
-              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} />
+              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} routeGeometry={routeGeometry} />
             </div>
             <ElevationProfile trail={selectedTrail} />
             <div className={`absolute left-0 right-0 bottom-0 bg-card border-t border-border rounded-t-2xl shadow-lg transition-all duration-300 ${isBottomSheetExpanded ? 'h-[70vh]' : 'h-[260px]'}`}>
