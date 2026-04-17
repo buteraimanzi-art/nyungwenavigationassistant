@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { ParkHeader } from '@/components/park/ParkHeader';
 import { LeafletTrailMap } from '@/components/park/LeafletTrailMap';
 import { TrailInfoPanel } from '@/components/park/TrailInfoPanel';
@@ -11,7 +11,7 @@ import { EmergencySOS } from '@/components/park/EmergencySOS';
 import { GettingThereMap } from '@/components/park/GettingThereMap';
 import { trails, calculateTrailProgress } from '@/lib/trail-data';
 import { useDemoLocation } from '@/hooks/use-location';
-import { generateRoute, type NavStep } from '@/lib/navigation';
+import { useRealRoute } from '@/hooks/use-real-route';
 import type { Trail, Attraction, RestArea } from '@/lib/types';
 import type { Reception } from '@/lib/receptions';
 import { Button } from '@/components/ui/button';
@@ -33,10 +33,13 @@ export default function Index() {
 
   const { location: userLocation, followRoute } = useDemoLocation();
 
-  const navSteps = useMemo(() => {
-    if (!isNavigating || !chosenReception || !selectedTrail) return null;
-    return generateRoute(chosenReception, selectedTrail.startPoint);
-  }, [isNavigating, chosenReception, selectedTrail]);
+  const { route: realRoute, loading: routeLoading } = useRealRoute(
+    isNavigating,
+    chosenReception,
+    selectedTrail?.startPoint ?? null,
+  );
+  const navSteps = realRoute?.steps ?? null;
+  const routeGeometry = realRoute?.geometry ?? null;
 
   const trailProgress = useMemo(() => {
     if (!selectedTrail || !userLocation || selectedTrail.path.length < 2) return null;
@@ -64,9 +67,14 @@ export default function Index() {
     setChosenReception(reception);
     setShowDirections(true);
     setIsNavigating(true);
-    const steps = generateRoute(reception, selectedTrail.startPoint);
-    followRoute(steps.map(s => s.coordinate));
-  }, [selectedTrail, followRoute]);
+  }, [selectedTrail]);
+
+  // When the real route arrives, drive the demo location along its geometry
+  useEffect(() => {
+    if (isNavigating && routeGeometry && routeGeometry.length > 1) {
+      followRoute(routeGeometry);
+    }
+  }, [isNavigating, routeGeometry, followRoute]);
 
   const handleStopNavigation = () => {
     setIsNavigating(false);
@@ -178,7 +186,7 @@ export default function Index() {
             </aside>
             <main className="flex-1 relative flex flex-col">
               <div className="flex-1 relative">
-                <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} />
+                <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} routeGeometry={routeGeometry} />
                 {(selectedAttraction || selectedRestArea) && (
                   <div className="absolute top-4 left-4 right-4 max-w-sm z-20">
                     <Card className="shadow-lg border-none">
@@ -208,7 +216,7 @@ export default function Index() {
               {userLocation && <Badge variant="outline" className="gap-1 border-komoot-olive text-komoot-olive"><div className="w-2 h-2 rounded-full bg-komoot-olive animate-pulse" />GPS</Badge>}
             </div>
             <div className="flex-1 relative">
-              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} />
+              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} routeGeometry={routeGeometry} />
             </div>
             <ElevationProfile trail={selectedTrail} />
             <div className={`absolute left-0 right-0 bottom-0 bg-card border-t border-border rounded-t-2xl shadow-lg transition-all duration-300 ${isBottomSheetExpanded ? 'h-[70vh]' : 'h-[260px]'}`}>

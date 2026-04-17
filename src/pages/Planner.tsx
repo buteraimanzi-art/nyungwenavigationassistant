@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { ParkHeader } from '@/components/park/ParkHeader';
 import { EmergencySOS } from '@/components/park/EmergencySOS';
 import { LeafletTrailMap } from '@/components/park/LeafletTrailMap';
@@ -8,7 +8,7 @@ import { ElevationProfile } from '@/components/park/ElevationProfile';
 import { TrailInfoPanel } from '@/components/park/TrailInfoPanel';
 import { trails, calculateTrailProgress } from '@/lib/trail-data';
 import { useDemoLocation } from '@/hooks/use-location';
-import { generateRoute } from '@/lib/navigation';
+import { useRealRoute } from '@/hooks/use-real-route';
 import type { Trail, Attraction, RestArea } from '@/lib/types';
 import type { Reception } from '@/lib/receptions';
 import { Button } from '@/components/ui/button';
@@ -26,10 +26,13 @@ export default function Planner() {
 
   const { location: userLocation, followRoute } = useDemoLocation();
 
-  const navSteps = useMemo(() => {
-    if (!isNavigating || !chosenReception || !selectedTrail) return null;
-    return generateRoute(chosenReception, selectedTrail.startPoint);
-  }, [isNavigating, chosenReception, selectedTrail]);
+  const { route: realRoute } = useRealRoute(
+    isNavigating,
+    chosenReception,
+    selectedTrail?.startPoint ?? null,
+  );
+  const navSteps = realRoute?.steps ?? null;
+  const routeGeometry = realRoute?.geometry ?? null;
 
   const trailProgress = useMemo(() => {
     if (!selectedTrail || !userLocation || selectedTrail.path.length < 2) return null;
@@ -39,11 +42,15 @@ export default function Planner() {
   const handleStartNavigation = useCallback((reception: Reception) => {
     if (!selectedTrail) return;
     setChosenReception(reception);
-    setShowDirections(true);
     setIsNavigating(true);
-    const steps = generateRoute(reception, selectedTrail.startPoint);
-    followRoute(steps.map(s => s.coordinate));
-  }, [selectedTrail, followRoute]);
+    setShowDirections(true);
+  }, [selectedTrail]);
+
+  useEffect(() => {
+    if (isNavigating && routeGeometry && routeGeometry.length > 1) {
+      followRoute(routeGeometry);
+    }
+  }, [isNavigating, routeGeometry, followRoute]);
 
   const handleStopNavigation = () => {
     setIsNavigating(false);
@@ -102,7 +109,7 @@ export default function Planner() {
           {selectedTrail ? (
             <>
               <div className="flex-1">
-                <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} />
+                <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} routeGeometry={routeGeometry} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} />
               </div>
               <ElevationProfile trail={selectedTrail} />
             </>

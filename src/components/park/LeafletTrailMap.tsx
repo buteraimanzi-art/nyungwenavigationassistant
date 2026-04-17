@@ -23,6 +23,8 @@ interface LeafletTrailMapProps {
   showDirections?: boolean;
   chosenReception?: Reception | null;
   navSteps?: NavStep[] | null;
+  /** Real road-following geometry from OSRM. When provided, drawn as the route polyline. */
+  routeGeometry?: { lat: number; lng: number }[] | null;
   onSelectAttraction?: (a: Attraction) => void;
   onSelectRestArea?: (r: RestArea) => void;
 }
@@ -55,7 +57,7 @@ function createStepIcon(num: number, isActive: boolean) {
   });
 }
 
-export function LeafletTrailMap({ trail, userLocation, showDirections, chosenReception, navSteps }: LeafletTrailMapProps) {
+export function LeafletTrailMap({ trail, userLocation, showDirections, chosenReception, navSteps, routeGeometry }: LeafletTrailMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerGroupRef = useRef<L.LayerGroup | null>(null);
@@ -127,8 +129,13 @@ export function LeafletTrailMap({ trail, userLocation, showDirections, chosenRec
 
     // Navigation route
     if (navSteps && navSteps.length > 0 && activeReception) {
-      const routeCoords: [number, number][] = navSteps.map(s => [s.coordinate.lat, s.coordinate.lng]);
-      L.polyline(routeCoords, { color: '#2563eb', weight: 6, opacity: 0.8 }).addTo(layerGroup);
+      // Prefer real road geometry from OSRM when provided
+      const polylineCoords: [number, number][] =
+        routeGeometry && routeGeometry.length > 1
+          ? routeGeometry.map((p) => [p.lat, p.lng])
+          : navSteps.map((s) => [s.coordinate.lat, s.coordinate.lng]);
+      L.polyline(polylineCoords, { color: '#2563eb', weight: 6, opacity: 0.85 }).addTo(layerGroup);
+
       const currentIdx = userLocation ? findNearestStepIdx(userLocation, navSteps) : 0;
       navSteps.forEach((step, i) => {
         if (i === 0 || i === navSteps.length - 1) return;
@@ -137,7 +144,7 @@ export function LeafletTrailMap({ trail, userLocation, showDirections, chosenRec
           .bindPopup(`<div style="font-size:12px;"><strong>Step ${i + 1}</strong><br/>${step.instruction}</div>`)
           .addTo(layerGroup);
       });
-      const bounds = L.latLngBounds(routeCoords);
+      const bounds = L.latLngBounds(polylineCoords);
       if (userLocation && isFinite(userLocation.lat)) bounds.extend([userLocation.lat, userLocation.lng]);
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
     } else if (activeReception) {
@@ -163,7 +170,7 @@ export function LeafletTrailMap({ trail, userLocation, showDirections, chosenRec
     } else if (!activeReception) {
       map.setView(PARK_CENTER, PARK_ZOOM);
     }
-  }, [activeReception, navSteps, roadPaths, trail, trailPaths, userLocation]);
+  }, [activeReception, navSteps, routeGeometry, roadPaths, trail, trailPaths, userLocation]);
 
   return (
     <div className="relative h-full min-h-[400px] w-full overflow-hidden rounded-lg border border-border bg-muted">
