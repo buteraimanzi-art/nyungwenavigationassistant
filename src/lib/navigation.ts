@@ -138,19 +138,21 @@ export function generateSyntheticRoute(reception: Reception, trailStart: Coordin
   const steps: NavStep[] = [];
   const totalDist = calculateDistance(reception.coordinates, trailStart);
   const numWaypoints = Math.max(4, Math.min(10, Math.round(totalDist / 800)));
-  const waypoints: Coordinates[] = [reception.coordinates];
-
+  const outbound: Coordinates[] = [reception.coordinates];
   for (let i = 1; i < numWaypoints; i++) {
     const t = i / numWaypoints;
     const lat = reception.coordinates.lat + (trailStart.lat - reception.coordinates.lat) * t;
     const lng = reception.coordinates.lng + (trailStart.lng - reception.coordinates.lng) * t;
     const seed = Math.sin(i * 47.3) * 0.5 + 0.5;
     const offset = (seed - 0.5) * 0.004;
-    waypoints.push({ lat: lat + offset * 0.6, lng: lng + offset });
+    outbound.push({ lat: lat + offset * 0.6, lng: lng + offset });
   }
-  waypoints.push(trailStart);
+  outbound.push(trailStart);
+  // Round-trip: append reverse path back to reception
+  const waypoints: Coordinates[] = [...outbound, ...outbound.slice(0, -1).reverse()];
 
   let cumDist = 0;
+  const turnaroundIdx = outbound.length - 1;
   for (let i = 0; i < waypoints.length; i++) {
     const prev = i > 0 ? waypoints[i - 1] : waypoints[0];
     const curr = waypoints[i];
@@ -164,7 +166,10 @@ export function generateSyntheticRoute(reception: Reception, trailStart: Coordin
       instruction = `Depart from ${reception.name}`;
     } else if (i === waypoints.length - 1) {
       direction = 'arrive';
-      instruction = 'Arrive at trailhead — you made it!';
+      instruction = `Arrive back at ${reception.name} — round trip complete!`;
+    } else if (i === turnaroundIdx) {
+      direction = 'uturn';
+      instruction = `Reach trailhead — turn around and head back to ${reception.name}`;
     } else {
       const next = waypoints[i + 1];
       const bearingIn = getBearing(prev, curr);
