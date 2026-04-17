@@ -69,7 +69,10 @@ export async function fetchRoute(
   if (cached) return cached;
 
   try {
-    const url = `${OSRM_BASE}/driving/${reception.coordinates.lng},${reception.coordinates.lat};${trailStart.lng},${trailStart.lat}?overview=full&geometries=geojson&steps=true`;
+    // Round trip: reception → trail start → reception (returns via real roads)
+    const r = `${reception.coordinates.lng},${reception.coordinates.lat}`;
+    const t = `${trailStart.lng},${trailStart.lat}`;
+    const url = `${OSRM_BASE}/driving/${r};${t};${r}?overview=full&geometries=geojson&steps=true`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`OSRM ${res.status}`);
     const data = await res.json();
@@ -82,18 +85,33 @@ export async function fetchRoute(
 
     const steps: NavStep[] = [];
     let cumDist = 0;
-    const osrmSteps = route.legs?.[0]?.steps ?? [];
-    osrmSteps.forEach((s: { maneuver: { type: string; modifier?: string; location: [number, number] }; distance: number; name?: string }, i: number) => {
-      const dir = osrmManeuverToDirection(s.maneuver);
-      cumDist += s.distance;
-      const isLast = i === osrmSteps.length - 1;
-      steps.push({
-        id: i,
-        instruction: buildInstruction(dir, s.distance, s.name, isLast, reception.name),
-        direction: dir,
-        coordinate: { lat: s.maneuver.location[1], lng: s.maneuver.location[0] },
-        distanceFromPrev: Math.round(s.distance),
-        cumulativeDistance: Math.round(cumDist),
+    const legs = route.legs ?? [];
+    legs.forEach((leg: { steps: Array<{ maneuver: { type: string; modifier?: string; location: [number, number] }; distance: number; name?: string }> }, legIdx: number) => {
+      const isReturnLeg = legIdx === 1;
+      leg.steps.forEach((s, i) => {
+        // Skip the duplicate "depart" maneuver at the start of the return leg (it's the same point as trail arrival)
+        if (isReturnLeg && i === 0) return;
+        const dir = osrmManeuverToDirection(s.maneuver);
+        cumDist += s.distance;
+        const isFinal = legIdx === legs.length - 1 && i === leg.steps.length - 1;
+        let instruction: string;
+        if (legIdx === 0 && i === 0) {
+          instruction = buildInstruction('start', 0, s.name, false, reception.name);
+        } else if (isReturnLeg && i === 1) {
+          instruction = `Turn around at trailhead and head back to ${reception.name}${s.name ? ` via ${s.name}` : ''}`;
+        } else if (isFinal) {
+          instruction = `Arrive back at ${reception.name} — round trip complete!`;
+        } else {
+          instruction = buildInstruction(dir, s.distance, s.name, false, reception.name);
+        }
+        steps.push({
+          id: steps.length,
+          instruction,
+          direction: isFinal ? 'arrive' : dir,
+          coordinate: { lat: s.maneuver.location[1], lng: s.maneuver.location[0] },
+          distanceFromPrev: Math.round(s.distance),
+          cumulativeDistance: Math.round(cumDist),
+        });
       });
     });
 
