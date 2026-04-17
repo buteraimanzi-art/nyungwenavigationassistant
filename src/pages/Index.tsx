@@ -8,6 +8,7 @@ import { NavigationPanel } from '@/components/park/NavigationPanel';
 import { ElevationProfile } from '@/components/park/ElevationProfile';
 import { VoiceAssistant } from '@/components/park/VoiceAssistant';
 import { EmergencySOS } from '@/components/park/EmergencySOS';
+import { GettingThereMap } from '@/components/park/GettingThereMap';
 import { trails, calculateTrailProgress } from '@/lib/trail-data';
 import { useDemoLocation } from '@/hooks/use-location';
 import { generateRoute, type NavStep } from '@/lib/navigation';
@@ -120,6 +121,22 @@ export default function Index() {
                   Plan a Route
                 </Button>
               </div>
+            </div>
+          </div>
+
+          {/* Getting to Nyungwe */}
+          <div id="getting-there" className="bg-background py-12 border-b border-border">
+            <div className="container max-w-6xl mx-auto px-4">
+              <div className="mb-6">
+                <p className="uppercase tracking-[0.15em] text-xs font-semibold text-muted-foreground mb-2">
+                  Plan your trip to the park
+                </p>
+                <h2 className="text-3xl font-bold text-foreground">How to get to Nyungwe</h2>
+                <p className="text-muted-foreground mt-2 max-w-2xl">
+                  Tap a starting city to see the recommended driving route, distance, and travel time to the park entrances.
+                </p>
+              </div>
+              <GettingThereMap />
             </div>
           </div>
 
