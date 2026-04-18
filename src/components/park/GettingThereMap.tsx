@@ -4,15 +4,25 @@ import 'leaflet/dist/leaflet.css';
 import { RECEPTIONS } from '@/lib/receptions';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plane, Car, MapPin, Clock, Navigation, Loader2 } from 'lucide-react';
+import { Plane, Car, MapPin, Clock, Navigation, Loader2, LocateFixed } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 // Major tourist origin points in Rwanda
-const ORIGINS = [
+interface Origin {
+  id: string;
+  name: string;
+  coordinates: { lat: number; lng: number };
+  type: 'airport' | 'city' | 'user';
+  description: string;
+  color: string;
+}
+
+const STATIC_ORIGINS: Origin[] = [
   {
     id: 'kigali',
     name: 'Kigali (Capital & Airport)',
     coordinates: { lat: -1.9706, lng: 30.1044 },
-    type: 'airport' as const,
+    type: 'airport',
     description: 'Kigali International Airport (KGL). Most international tourists start here.',
     color: '#dc2626',
   },
@@ -20,7 +30,7 @@ const ORIGINS = [
     id: 'huye',
     name: 'Huye (Butare)',
     coordinates: { lat: -2.5959, lng: 29.7395 },
-    type: 'city' as const,
+    type: 'city',
     description: 'Major southern city, common stopover en route to Nyungwe.',
     color: '#ea580c',
   },
@@ -28,7 +38,7 @@ const ORIGINS = [
     id: 'rusizi',
     name: 'Rusizi (Cyangugu)',
     coordinates: { lat: -2.4847, lng: 28.9075 },
-    type: 'city' as const,
+    type: 'city',
     description: 'Lake Kivu border town near Gisakura HQ — closest city to the park.',
     color: '#0284c7',
   },
@@ -36,13 +46,13 @@ const ORIGINS = [
     id: 'musanze',
     name: 'Musanze (Ruhengeri)',
     coordinates: { lat: -1.4995, lng: 29.6336 },
-    type: 'city' as const,
+    type: 'city',
     description: 'Northern city, gateway to Volcanoes NP — connects via Kigali.',
     color: '#7c3aed',
   },
 ];
 
-// Which receptions to route to from each origin
+// Which receptions to route to from each known origin
 const DESTINATIONS: Record<string, { receptionId: string; via: string }[]> = {
   kigali: [
     { receptionId: 'reception-uwinka', via: 'Kigali → Muhanga → Huye → Uwinka (RN1 + RN6)' },
@@ -71,7 +81,6 @@ interface RoadRoute {
 }
 
 const RWANDA_CENTER: [number, number] = [-2.0, 29.7];
-const RWANDA_BOUNDS: L.LatLngBoundsExpression = [[-2.95, 28.8], [-1.0, 30.95]];
 
 // Cache OSRM responses in-memory across renders
 const routeCache = new Map<string, RoadRoute>();
@@ -100,11 +109,12 @@ async function fetchOsrmRoute(
   }
 }
 
-function createOriginIcon(color: string, isAirport: boolean, isActive: boolean) {
+function createOriginIcon(color: string, isAirport: boolean, isActive: boolean, isUser = false) {
   const size = isActive ? 40 : 32;
-  const symbol = isAirport ? '✈' : '●';
+  const symbol = isUser ? '★' : isAirport ? '✈' : '●';
+  const ring = isUser ? `box-shadow:0 0 0 4px ${color}33, 0 2px 10px rgba(0,0,0,0.35);` : 'box-shadow:0 2px 10px rgba(0,0,0,0.35);';
   return L.divIcon({
-    html: `<div style="background:${color};color:white;border-radius:9999px;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${Math.round(size * 0.5)}px;border:3px solid white;box-shadow:0 2px 10px rgba(0,0,0,0.35);">${symbol}</div>`,
+    html: `<div style="background:${color};color:white;border-radius:9999px;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${Math.round(size * 0.5)}px;border:3px solid white;${ring}">${symbol}</div>`,
     className: '',
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
@@ -122,10 +132,46 @@ export function GettingThereMap() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
+  const [userOrigin, setUserOrigin] = useState<Origin | null>(null);
   const [activeOrigin, setActiveOrigin] = useState<string>('kigali');
   const [routes, setRoutes] = useState<RoadRoute[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [locating, setLocating] = useState(false);
+
+  const origins: Origin[] = userOrigin ? [userOrigin, ...STATIC_ORIGINS] : STATIC_ORIGINS;
+
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      toast({ title: 'Geolocation unavailable', description: 'Your browser does not support location.', variant: 'destructive' });
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const newOrigin: Origin = {
+          id: 'my-location',
+          name: 'My Current Location',
+          coordinates: { lat: pos.coords.latitude, lng: pos.coords.longitude },
+          type: 'user',
+          description: `Your live GPS position (±${Math.round(pos.coords.accuracy)}m). Real road directions to all 3 park receptions.`,
+          color: '#0ea5e9',
+        };
+        setUserOrigin(newOrigin);
+        setActiveOrigin('my-location');
+        setLocating(false);
+        toast({ title: 'Location found', description: 'Calculating real road routes from your position…' });
+      },
+      (err) => {
+        setLocating(false);
+        const msg = err.code === 1
+          ? 'Permission denied. Please allow location access in your browser.'
+          : err.code === 2 ? 'Position unavailable. Check your GPS.' : 'Location request timed out.';
+        toast({ title: 'Could not get location', description: msg, variant: 'destructive' });
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+    );
+  };
 
   // Init map
   useEffect(() => {
@@ -133,9 +179,8 @@ export function GettingThereMap() {
     const map = L.map(containerRef.current, {
       center: RWANDA_CENTER,
       zoom: 9,
-      minZoom: 7,
-      maxZoom: 14,
-      maxBounds: RWANDA_BOUNDS,
+      minZoom: 3,
+      maxZoom: 16,
       zoomControl: true,
     });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -152,9 +197,12 @@ export function GettingThereMap() {
 
   // Fetch routes from OSRM whenever the active origin changes
   useEffect(() => {
-    const origin = ORIGINS.find((o) => o.id === activeOrigin);
+    const origin = origins.find((o) => o.id === activeOrigin);
     if (!origin) return;
-    const dests = DESTINATIONS[activeOrigin] || [];
+
+    const dests = activeOrigin === 'my-location'
+      ? RECEPTIONS.map((r) => ({ receptionId: r.id, via: `Your location → ${r.name} (real roads)` }))
+      : (DESTINATIONS[activeOrigin] || []);
     let cancelled = false;
 
     (async () => {
@@ -164,7 +212,7 @@ export function GettingThereMap() {
       for (const d of dests) {
         const reception = RECEPTIONS.find((r) => r.id === d.receptionId);
         if (!reception) continue;
-        const cacheKey = `${activeOrigin}->${d.receptionId}`;
+        const cacheKey = `${activeOrigin}:${origin.coordinates.lat.toFixed(4)},${origin.coordinates.lng.toFixed(4)}->${d.receptionId}`;
         let cached = routeCache.get(cacheKey);
         if (!cached) {
           const fetched = await fetchOsrmRoute(origin.coordinates, reception.coordinates);
@@ -179,6 +227,7 @@ export function GettingThereMap() {
       if (results.length === 0) {
         setError('Could not load road routes. Check your connection and try again.');
       }
+      results.sort((a, b) => a.distanceKm - b.distanceKm);
       setRoutes(results);
       setLoading(false);
     })();
@@ -186,7 +235,8 @@ export function GettingThereMap() {
     return () => {
       cancelled = true;
     };
-  }, [activeOrigin]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeOrigin, userOrigin?.coordinates.lat, userOrigin?.coordinates.lng]);
 
   // Render markers + polylines
   useEffect(() => {
@@ -201,8 +251,8 @@ export function GettingThereMap() {
         .addTo(layer);
     });
 
-    ORIGINS.forEach((o) => {
-      const icon = createOriginIcon(o.color, o.type === 'airport', o.id === activeOrigin);
+    origins.forEach((o) => {
+      const icon = createOriginIcon(o.color, o.type === 'airport', o.id === activeOrigin, o.type === 'user');
       L.marker([o.coordinates.lat, o.coordinates.lng], { icon })
         .bindPopup(`<strong>${o.name}</strong><br/><span style="font-size:12px;">${o.description}</span>`)
         .addTo(layer);
@@ -225,16 +275,40 @@ export function GettingThereMap() {
 
     if (allCoords.length > 0) {
       const bounds = L.latLngBounds(allCoords);
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 10 });
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 11 });
     }
-  }, [activeOrigin, routes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeOrigin, routes, userOrigin]);
 
-  const active = ORIGINS.find((o) => o.id === activeOrigin);
+  const active = origins.find((o) => o.id === activeOrigin);
+  const isUserActive = activeOrigin === 'my-location';
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
-        {ORIGINS.map((o) => (
+        <Button
+          variant={isUserActive ? 'default' : 'secondary'}
+          size="sm"
+          onClick={handleUseMyLocation}
+          className="gap-2"
+          disabled={locating || loading}
+        >
+          {locating ? <Loader2 className="w-4 h-4 animate-spin" /> : <LocateFixed className="w-4 h-4" />}
+          {userOrigin ? 'Update My Location' : 'Use My Current Location'}
+        </Button>
+        {userOrigin && !isUserActive && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setActiveOrigin('my-location')}
+            className="gap-2"
+            disabled={loading}
+          >
+            <MapPin className="w-4 h-4" />
+            From My Location
+          </Button>
+        )}
+        {STATIC_ORIGINS.map((o) => (
           <Button
             key={o.id}
             variant={activeOrigin === o.id ? 'default' : 'outline'}
@@ -269,6 +343,12 @@ export function GettingThereMap() {
             <p className="text-sm text-muted-foreground mt-1">{active?.description}</p>
           </div>
 
+          {!userOrigin && (
+            <div className="text-xs bg-primary/10 border border-primary/30 rounded-lg p-2 text-foreground">
+              📍 <strong>Tip:</strong> Tap <em>"Use My Current Location"</em> to get real road directions from where you are right now to all 3 park entrances.
+            </div>
+          )}
+
           {error && (
             <div className="text-xs text-destructive bg-destructive/10 border border-destructive/30 rounded-lg p-2">
               {error}
@@ -287,6 +367,11 @@ export function GettingThereMap() {
                 <div key={idx} className="border border-border rounded-lg p-3 bg-card">
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="font-medium text-sm">→ {dest?.name}</div>
+                    {idx === 0 && (
+                      <span className="text-[10px] uppercase tracking-wide font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                        Closest
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">{route.via}</p>
                   <div className="flex items-center gap-3 text-xs">
@@ -304,7 +389,7 @@ export function GettingThereMap() {
 
           <div className="pt-2 border-t border-border">
             <p className="text-xs text-muted-foreground">
-              💡 <strong>Tip:</strong> Routes are calculated on real Rwandan roads via OpenStreetMap (OSRM). Most tourists fly into Kigali (KGL) and drive ~6h via Huye. Domestic flights to Kamembe (Rusizi) cut travel to ~1h total.
+              💡 Routes are calculated on real roads via OpenStreetMap (OSRM). {isUserActive ? 'Showing routes from your live GPS position to all 3 park entrances.' : 'Most tourists fly into Kigali (KGL) and drive ~6h via Huye.'}
             </p>
           </div>
         </Card>
