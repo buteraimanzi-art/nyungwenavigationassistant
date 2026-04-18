@@ -8,12 +8,21 @@ import { Plane, Car, MapPin, Clock, Navigation, Loader2, LocateFixed } from 'luc
 import { toast } from '@/hooks/use-toast';
 
 // Major tourist origin points in Rwanda
-const ORIGINS = [
+interface Origin {
+  id: string;
+  name: string;
+  coordinates: { lat: number; lng: number };
+  type: 'airport' | 'city' | 'user';
+  description: string;
+  color: string;
+}
+
+const STATIC_ORIGINS: Origin[] = [
   {
     id: 'kigali',
     name: 'Kigali (Capital & Airport)',
     coordinates: { lat: -1.9706, lng: 30.1044 },
-    type: 'airport' as const,
+    type: 'airport',
     description: 'Kigali International Airport (KGL). Most international tourists start here.',
     color: '#dc2626',
   },
@@ -21,7 +30,7 @@ const ORIGINS = [
     id: 'huye',
     name: 'Huye (Butare)',
     coordinates: { lat: -2.5959, lng: 29.7395 },
-    type: 'city' as const,
+    type: 'city',
     description: 'Major southern city, common stopover en route to Nyungwe.',
     color: '#ea580c',
   },
@@ -29,7 +38,7 @@ const ORIGINS = [
     id: 'rusizi',
     name: 'Rusizi (Cyangugu)',
     coordinates: { lat: -2.4847, lng: 28.9075 },
-    type: 'city' as const,
+    type: 'city',
     description: 'Lake Kivu border town near Gisakura HQ — closest city to the park.',
     color: '#0284c7',
   },
@@ -37,13 +46,13 @@ const ORIGINS = [
     id: 'musanze',
     name: 'Musanze (Ruhengeri)',
     coordinates: { lat: -1.4995, lng: 29.6336 },
-    type: 'city' as const,
+    type: 'city',
     description: 'Northern city, gateway to Volcanoes NP — connects via Kigali.',
     color: '#7c3aed',
   },
 ];
 
-// Which receptions to route to from each origin
+// Which receptions to route to from each known origin
 const DESTINATIONS: Record<string, { receptionId: string; via: string }[]> = {
   kigali: [
     { receptionId: 'reception-uwinka', via: 'Kigali → Muhanga → Huye → Uwinka (RN1 + RN6)' },
