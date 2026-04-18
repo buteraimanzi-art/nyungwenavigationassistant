@@ -22,7 +22,10 @@ export interface RouteResult {
   source: 'osrm' | 'fallback';
 }
 
-const OSRM_BASE = 'https://router.project-osrm.org/route/v1';
+const OSRM_ENDPOINTS = [
+  'https://routing.openstreetmap.de/routed-car/route/v1',
+  'https://router.project-osrm.org/route/v1',
+];
 const routeCache = new Map<string, RouteResult>();
 
 function osrmManeuverToDirection(maneuver: { type: string; modifier?: string }): TurnDirection {
@@ -68,67 +71,72 @@ export async function fetchRoute(
   const cached = routeCache.get(cacheKey);
   if (cached) return cached;
 
-  try {
-    // Round trip: reception → trail start → reception (returns via real roads)
-    const r = `${reception.coordinates.lng},${reception.coordinates.lat}`;
-    const t = `${trailStart.lng},${trailStart.lat}`;
-    const url = `${OSRM_BASE}/driving/${r};${t};${r}?overview=full&geometries=geojson&steps=true`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`OSRM ${res.status}`);
-    const data = await res.json();
-    const route = data.routes?.[0];
-    if (!route) throw new Error('No route');
+  // Round trip: reception → trail start → reception (returns via real roads)
+  const r = `${reception.coordinates.lng},${reception.coordinates.lat}`;
+  const t = `${trailStart.lng},${trailStart.lat}`;
 
-    const geometry: Coordinates[] = route.geometry.coordinates.map(
-      ([lng, lat]: [number, number]) => ({ lat, lng }),
-    );
+  for (const base of OSRM_ENDPOINTS) {
+    try {
+      const url = `${base}/driving/${r};${t};${r}?overview=full&geometries=geojson&steps=true`;
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 12000);
+      const res = await fetch(url, { signal: ctrl.signal });
+      clearTimeout(timer);
+      if (!res.ok) throw new Error(`OSRM ${res.status}`);
+      const data = await res.json();
+      const route = data.routes?.[0];
+      if (!route) throw new Error('No route');
 
-    const steps: NavStep[] = [];
-    let cumDist = 0;
-    const legs = route.legs ?? [];
-    legs.forEach((leg: { steps: Array<{ maneuver: { type: string; modifier?: string; location: [number, number] }; distance: number; name?: string }> }, legIdx: number) => {
-      const isReturnLeg = legIdx === 1;
-      leg.steps.forEach((s, i) => {
-        // Skip the duplicate "depart" maneuver at the start of the return leg (it's the same point as trail arrival)
-        if (isReturnLeg && i === 0) return;
-        const dir = osrmManeuverToDirection(s.maneuver);
-        cumDist += s.distance;
-        const isFinal = legIdx === legs.length - 1 && i === leg.steps.length - 1;
-        let instruction: string;
-        if (legIdx === 0 && i === 0) {
-          instruction = buildInstruction('start', 0, s.name, false, reception.name);
-        } else if (isReturnLeg && i === 1) {
-          instruction = `Turn around at trailhead and head back to ${reception.name}${s.name ? ` via ${s.name}` : ''}`;
-        } else if (isFinal) {
-          instruction = `Arrive back at ${reception.name} — round trip complete!`;
-        } else {
-          instruction = buildInstruction(dir, s.distance, s.name, false, reception.name);
-        }
-        steps.push({
-          id: steps.length,
-          instruction,
-          direction: isFinal ? 'arrive' : dir,
-          coordinate: { lat: s.maneuver.location[1], lng: s.maneuver.location[0] },
-          distanceFromPrev: Math.round(s.distance),
-          cumulativeDistance: Math.round(cumDist),
+      const geometry: Coordinates[] = route.geometry.coordinates.map(
+        ([lng, lat]: [number, number]) => ({ lat, lng }),
+      );
+
+      const steps: NavStep[] = [];
+      let cumDist = 0;
+      const legs = route.legs ?? [];
+      legs.forEach((leg: { steps: Array<{ maneuver: { type: string; modifier?: string; location: [number, number] }; distance: number; name?: string }> }, legIdx: number) => {
+        const isReturnLeg = legIdx === 1;
+        leg.steps.forEach((s, i) => {
+          if (isReturnLeg && i === 0) return;
+          const dir = osrmManeuverToDirection(s.maneuver);
+          cumDist += s.distance;
+          const isFinal = legIdx === legs.length - 1 && i === leg.steps.length - 1;
+          let instruction: string;
+          if (legIdx === 0 && i === 0) {
+            instruction = buildInstruction('start', 0, s.name, false, reception.name);
+          } else if (isReturnLeg && i === 1) {
+            instruction = `Turn around at trailhead and head back to ${reception.name}${s.name ? ` via ${s.name}` : ''}`;
+          } else if (isFinal) {
+            instruction = `Arrive back at ${reception.name} — round trip complete!`;
+          } else {
+            instruction = buildInstruction(dir, s.distance, s.name, false, reception.name);
+          }
+          steps.push({
+            id: steps.length,
+            instruction,
+            direction: isFinal ? 'arrive' : dir,
+            coordinate: { lat: s.maneuver.location[1], lng: s.maneuver.location[0] },
+            distanceFromPrev: Math.round(s.distance),
+            cumulativeDistance: Math.round(cumDist),
+          });
         });
       });
-    });
 
-    const result: RouteResult = {
-      steps,
-      geometry,
-      totalDistance: route.distance,
-      totalDuration: route.duration,
-      source: 'osrm',
-    };
-    routeCache.set(cacheKey, result);
-    return result;
-  } catch {
-    // Fallback to synthetic route
-    const fallback = generateSyntheticRoute(reception, trailStart);
-    return fallback;
+      const result: RouteResult = {
+        steps,
+        geometry,
+        totalDistance: route.distance,
+        totalDuration: route.duration,
+        source: 'osrm',
+      };
+      routeCache.set(cacheKey, result);
+      return result;
+    } catch {
+      continue;
+    }
   }
+  // All endpoints failed — synthetic fallback
+  return generateSyntheticRoute(reception, trailStart);
 }
 
 /**
