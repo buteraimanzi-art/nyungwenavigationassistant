@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import { RECEPTIONS } from '@/lib/receptions';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plane, Car, MapPin, Clock, Navigation, Loader2, LocateFixed, ExternalLink } from 'lucide-react';
+import { Plane, Car, MapPin, Clock, Navigation, Loader2, LocateFixed, ExternalLink, Bike, Bus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 // Major tourist origin points in Rwanda
