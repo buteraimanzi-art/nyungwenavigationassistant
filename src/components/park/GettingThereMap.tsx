@@ -52,6 +52,24 @@ const STATIC_ORIGINS: Origin[] = [
   },
 ];
 
+// Nyabugogo bus station — main long-distance bus hub for Kigali → Nyungwe routes
+const NYABUGOGO = {
+  name: 'Nyabugogo Bus Station, Kigali',
+  coordinates: { lat: -1.9395, lng: 30.0419 },
+};
+
+function formatEta(hoursFromNow: number): string {
+  const arrival = new Date(Date.now() + hoursFromNow * 3600 * 1000);
+  return arrival.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatDuration(hours: number): string {
+  if (hours < 1) return `${Math.round(hours * 60)} min`;
+  const h = Math.floor(hours);
+  const m = Math.round((hours - h) * 60);
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
 // Which receptions to route to from each known origin
 const DESTINATIONS: Record<string, { receptionId: string; via: string }[]> = {
   kigali: [
