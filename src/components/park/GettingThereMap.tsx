@@ -85,28 +85,50 @@ const RWANDA_CENTER: [number, number] = [-2.0, 29.7];
 // Cache OSRM responses in-memory across renders
 const routeCache = new Map<string, RoadRoute>();
 
+// Multiple OSRM-compatible endpoints — fall back if one is down/blocked
+const OSRM_ENDPOINTS = [
+  'https://routing.openstreetmap.de/routed-car/route/v1',
+  'https://router.project-osrm.org/route/v1',
+];
+
 async function fetchOsrmRoute(
   from: { lat: number; lng: number },
   to: { lat: number; lng: number },
 ): Promise<{ coords: [number, number][]; distanceKm: number; durationHrs: number } | null> {
-  const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const route = data.routes?.[0];
-    if (!route) return null;
-    const coords: [number, number][] = route.geometry.coordinates.map(
-      ([lng, lat]: [number, number]) => [lat, lng],
-    );
-    return {
-      coords,
-      distanceKm: route.distance / 1000,
-      durationHrs: route.duration / 3600,
-    };
-  } catch {
-    return null;
+  for (const base of OSRM_ENDPOINTS) {
+    const url = `${base}/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 12000);
+      const res = await fetch(url, { signal: ctrl.signal });
+      clearTimeout(timer);
+      if (!res.ok) continue;
+      const data = await res.json();
+      const route = data.routes?.[0];
+      if (!route) continue;
+      const coords: [number, number][] = route.geometry.coordinates.map(
+        ([lng, lat]: [number, number]) => [lat, lng],
+      );
+      return {
+        coords,
+        distanceKm: route.distance / 1000,
+        durationHrs: route.duration / 3600,
+      };
+    } catch {
+      continue;
+    }
   }
+  // Final fallback: straight-line estimate so the user still sees a route
+  const R = 6371;
+  const dLat = ((to.lat - from.lat) * Math.PI) / 180;
+  const dLng = ((to.lng - from.lng) * Math.PI) / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos((from.lat * Math.PI) / 180) * Math.cos((to.lat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+  const distanceKm = 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 1.35; // road factor
+  return {
+    coords: [[from.lat, from.lng], [to.lat, to.lng]],
+    distanceKm,
+    durationHrs: distanceKm / 55, // avg 55 km/h on Rwandan roads
+  };
 }
 
 function createOriginIcon(color: string, isAirport: boolean, isActive: boolean, isUser = false) {
