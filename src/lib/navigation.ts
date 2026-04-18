@@ -22,7 +22,10 @@ export interface RouteResult {
   source: 'osrm' | 'fallback';
 }
 
-const OSRM_BASE = 'https://router.project-osrm.org/route/v1';
+const OSRM_ENDPOINTS = [
+  'https://routing.openstreetmap.de/routed-car/route/v1',
+  'https://router.project-osrm.org/route/v1',
+];
 const routeCache = new Map<string, RouteResult>();
 
 function osrmManeuverToDirection(maneuver: { type: string; modifier?: string }): TurnDirection {
