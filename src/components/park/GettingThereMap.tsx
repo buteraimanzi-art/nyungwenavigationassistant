@@ -247,7 +247,9 @@ export function GettingThereMap() {
       }
       if (cancelled) return;
       if (results.length === 0) {
-        setError('Could not load road routes. Check your connection and try again.');
+        setError('Could not calculate routes. Please check your connection.');
+      } else if (results.every((r) => r.coords.length <= 2)) {
+        setError('Live road routing is unavailable right now — showing straight-line estimates.');
       }
       results.sort((a, b) => a.distanceKm - b.distanceKm);
       setRoutes(results);
