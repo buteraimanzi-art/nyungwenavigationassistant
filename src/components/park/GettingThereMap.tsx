@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import { RECEPTIONS } from '@/lib/receptions';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plane, Car, MapPin, Clock, Navigation, Loader2, LocateFixed, ExternalLink } from 'lucide-react';
+import { Plane, Car, MapPin, Clock, Navigation, Loader2, LocateFixed, ExternalLink, Bike, Bus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 // Major tourist origin points in Rwanda
@@ -51,6 +51,24 @@ const STATIC_ORIGINS: Origin[] = [
     color: '#7c3aed',
   },
 ];
+
+// Nyabugogo bus station — main long-distance bus hub for Kigali → Nyungwe routes
+const NYABUGOGO = {
+  name: 'Nyabugogo Bus Station, Kigali',
+  coordinates: { lat: -1.9395, lng: 30.0419 },
+};
+
+function formatEta(hoursFromNow: number): string {
+  const arrival = new Date(Date.now() + hoursFromNow * 3600 * 1000);
+  return arrival.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatDuration(hours: number): string {
+  if (hours < 1) return `${Math.round(hours * 60)} min`;
+  const h = Math.floor(hours);
+  const m = Math.round((hours - h) * 60);
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
 
 // Which receptions to route to from each known origin
 const DESTINATIONS: Record<string, { receptionId: string; via: string }[]> = {
@@ -408,14 +426,46 @@ export function GettingThereMap() {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">{route.via}</p>
-                  <div className="flex items-center gap-3 text-xs mb-3">
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs mb-3">
                     <span className="flex items-center gap-1 text-foreground">
-                      <Car className="w-3 h-3" /> {route.distanceKm.toFixed(0)} km
+                      <Car className="w-3 h-3 text-primary" /> Drive: {formatDuration(route.durationHrs)}
                     </span>
                     <span className="flex items-center gap-1 text-foreground">
-                      <Clock className="w-3 h-3" /> ~{route.durationHrs.toFixed(1)}h
+                      <Bike className="w-3 h-3 text-primary" /> Bike: ~{formatDuration(route.distanceKm / 18)}
+                    </span>
+                    <span className="flex items-center gap-1 text-muted-foreground">
+                      <MapPin className="w-3 h-3" /> {route.distanceKm.toFixed(0)} km
+                    </span>
+                    <span className="flex items-center gap-1 text-foreground font-medium">
+                      <Clock className="w-3 h-3 text-primary" /> Arrive ~{formatEta(route.durationHrs)}
                     </span>
                   </div>
+
+                  <div className="bg-amber-500/10 border border-amber-500/30 rounded-md p-2 mb-3">
+                    <div className="flex items-start gap-1.5 text-xs text-foreground">
+                      <Bus className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <p>
+                          <strong>No car?</strong> Take a long-distance bus from{' '}
+                          <strong>Nyabugogo Bus Station</strong> (Kigali) — operators like{' '}
+                          <em>Volcano Express, Horizon, Ritco</em> run daily to Huye/Rusizi (~6h, ~5,000 RWF).
+                        </p>
+                        {origin && (
+                          <a
+                            href={`https://www.google.com/maps/dir/?api=1&origin=${originParam}&destination=${NYABUGOGO.coordinates.lat},${NYABUGOGO.coordinates.lng}&travelmode=driving`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-300 hover:underline font-medium"
+                          >
+                            <Navigation className="w-3 h-3" />
+                            Directions to Nyabugogo Bus Station
+                            <ExternalLink className="w-2.5 h-2.5" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="flex flex-wrap gap-2">
                     <Button
                       asChild
