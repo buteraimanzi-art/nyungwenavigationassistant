@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import { RECEPTIONS } from '@/lib/receptions';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plane, Car, MapPin, Clock, Navigation, Loader2, LocateFixed } from 'lucide-react';
+import { Plane, Car, MapPin, Clock, Navigation, Loader2, LocateFixed, ExternalLink } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 // Major tourist origin points in Rwanda
@@ -387,6 +387,16 @@ export function GettingThereMap() {
             )}
             {routes.map((route, idx) => {
               const dest = RECEPTIONS.find((r) => r.id === route.receptionId);
+              const origin = origins.find((o) => o.id === activeOrigin);
+              const isAppleDevice = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
+              const originParam = origin && activeOrigin === 'my-location'
+                ? `${origin.coordinates.lat},${origin.coordinates.lng}`
+                : origin
+                  ? `${origin.coordinates.lat},${origin.coordinates.lng}`
+                  : '';
+              const destParam = dest ? `${dest.coordinates.lat},${dest.coordinates.lng}` : '';
+              const gmapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${originParam}&destination=${destParam}&travelmode=driving`;
+              const appleMapsUrl = `https://maps.apple.com/?saddr=${originParam}&daddr=${destParam}&dirflg=d`;
               return (
                 <div key={idx} className="border border-border rounded-lg p-3 bg-card">
                   <div className="flex items-start justify-between gap-2 mb-2">
@@ -398,13 +408,40 @@ export function GettingThereMap() {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">{route.via}</p>
-                  <div className="flex items-center gap-3 text-xs">
+                  <div className="flex items-center gap-3 text-xs mb-3">
                     <span className="flex items-center gap-1 text-foreground">
                       <Car className="w-3 h-3" /> {route.distanceKm.toFixed(0)} km
                     </span>
                     <span className="flex items-center gap-1 text-foreground">
                       <Clock className="w-3 h-3" /> ~{route.durationHrs.toFixed(1)}h
                     </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      asChild
+                      size="sm"
+                      variant={idx === 0 ? 'default' : 'outline'}
+                      className="gap-1.5 h-8 text-xs flex-1"
+                    >
+                      <a href={gmapsUrl} target="_blank" rel="noopener noreferrer">
+                        <Navigation className="w-3.5 h-3.5" />
+                        Open in Google Maps
+                        <ExternalLink className="w-3 h-3 opacity-70" />
+                      </a>
+                    </Button>
+                    {isAppleDevice && (
+                      <Button
+                        asChild
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5 h-8 text-xs"
+                      >
+                        <a href={appleMapsUrl} target="_blank" rel="noopener noreferrer">
+                          <MapPin className="w-3.5 h-3.5" />
+                          Apple Maps
+                        </a>
+                      </Button>
+                    )}
                   </div>
                 </div>
               );
