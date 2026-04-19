@@ -178,15 +178,16 @@ function activityFor(
 /** Deterministic curated feed of recent Nyungwe activities. */
 function buildDemoActivities(): ReliveActivity[] {
   const seeds: Array<{ trail: string; user: number; daysAgo: number; pace: number }> = [
-    { trail: 'trail-canopy-walk', user: 0, daysAgo: 2, pace: 1.0 },
-    { trail: 'trail-igishigishigi', user: 1, daysAgo: 3, pace: 0.95 },
-    { trail: 'trail-isumo-waterfall', user: 2, daysAgo: 5, pace: 1.15 },
-    { trail: 'trail-bigugu', user: 3, daysAgo: 7, pace: 1.3 },
-    { trail: 'trail-canopy-walk', user: 4, daysAgo: 9, pace: 1.05 },
-    { trail: 'trail-kamiranzovu-marsh', user: 0, daysAgo: 11, pace: 1.1 },
-    { trail: 'trail-ngabwe', user: 1, daysAgo: 14, pace: 1.0 },
-    { trail: 'trail-isumo-waterfall', user: 2, daysAgo: 18, pace: 1.2 },
+    { trail: 'trail-igishigishigi', user: 0, daysAgo: 2, pace: 1.0 },
+    { trail: 'trail-bigugu', user: 1, daysAgo: 3, pace: 1.2 },
+    { trail: 'trail-kamiranzovu-waterfall', user: 2, daysAgo: 5, pace: 1.05 },
+    { trail: 'trail-imbaraga', user: 3, daysAgo: 7, pace: 1.3 },
+    { trail: 'trail-irebero', user: 4, daysAgo: 9, pace: 1.0 },
+    { trail: 'trail-congo-nile', user: 0, daysAgo: 11, pace: 1.1 },
+    { trail: 'trail-buhoro', user: 1, daysAgo: 14, pace: 0.95 },
+    { trail: 'trail-umuyove', user: 2, daysAgo: 18, pace: 1.0 },
     { trail: 'trail-igishigishigi', user: 3, daysAgo: 21, pace: 0.9 },
+    { trail: 'trail-bigugu', user: 4, daysAgo: 25, pace: 1.25 },
   ];
   const out: ReliveActivity[] = [];
   seeds.forEach((s, i) => {
