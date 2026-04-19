@@ -10,6 +10,8 @@ import { VoiceAssistant } from '@/components/park/VoiceAssistant';
 import { AudioGuide } from '@/components/park/AudioGuide';
 import { EmergencySOS } from '@/components/park/EmergencySOS';
 import { GettingThereMap } from '@/components/park/GettingThereMap';
+import { ReliveCommunityFeed } from '@/components/park/ReliveCommunityFeed';
+import { ReliveUploadButton } from '@/components/park/ReliveUploadButton';
 import { trails, calculateTrailProgress } from '@/lib/trail-data';
 import { useDemoLocation } from '@/hooks/use-location';
 import { useRealRoute } from '@/hooks/use-real-route';
@@ -90,6 +92,15 @@ export default function Index() {
         <DirectionsPanel trail={selectedTrail} userLocation={userLocation} isActive={showDirections} onStartDirections={handleStartNavigation} onClose={() => setShowDirections(false)} />
       )}
       <TrailInfoPanel trail={selectedTrail} progress={trailProgress} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} />
+      <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+        <div>
+          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Powered by Relive</p>
+          <h3 className="text-sm font-semibold">Share your hike</h3>
+          <p className="text-xs text-muted-foreground mt-1">Auto-generate a video of this trail and share it with the community.</p>
+        </div>
+        <ReliveUploadButton trail={selectedTrail} variant="default" size="sm" />
+      </div>
+      <ReliveCommunityFeed trailId={selectedTrail.id} compact title={`Recent ${selectedTrail.name} hikes`} />
     </div>
   );
 
@@ -164,6 +175,12 @@ export default function Index() {
               <TrailSelector trails={trails} selectedTrailId={selectedTrail?.id} onSelectTrail={handleSelectTrail} />
             </div>
           </div>
+
+          {/* Community adventures from Relive */}
+          <div className="bg-background border-b border-border">
+            <ReliveCommunityFeed limit={6} />
+          </div>
+
           <EmergencySOS userLocation={userLocation} trailId="" trailName="General" />
         </main>
       ) : selectedTrail ? (
