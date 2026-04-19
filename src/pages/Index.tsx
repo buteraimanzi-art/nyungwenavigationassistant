@@ -7,6 +7,7 @@ import { DirectionsPanel } from '@/components/park/DirectionsPanel';
 import { NavigationPanel } from '@/components/park/NavigationPanel';
 import { ElevationProfile } from '@/components/park/ElevationProfile';
 import { VoiceAssistant } from '@/components/park/VoiceAssistant';
+import { AudioGuide } from '@/components/park/AudioGuide';
 import { EmergencySOS } from '@/components/park/EmergencySOS';
 import { GettingThereMap } from '@/components/park/GettingThereMap';
 import { trails, calculateTrailProgress } from '@/lib/trail-data';
@@ -205,6 +206,7 @@ export default function Index() {
               <ElevationProfile trail={selectedTrail} />
               <EmergencySOS userLocation={userLocation} trailId={selectedTrail.id} trailName={selectedTrail.name} />
               <VoiceAssistant trail={selectedTrail} userLocation={userLocation} progress={trailProgress} isNavigating={isNavigating} />
+              <AudioGuide trail={selectedTrail} userLocation={userLocation} />
             </main>
           </div>
 
@@ -227,6 +229,7 @@ export default function Index() {
             </div>
             <EmergencySOS userLocation={userLocation} trailId={selectedTrail.id} trailName={selectedTrail.name} />
             <VoiceAssistant trail={selectedTrail} userLocation={userLocation} progress={trailProgress} isNavigating={isNavigating} />
+            <AudioGuide trail={selectedTrail} userLocation={userLocation} />
           </div>
         </>
       ) : null}

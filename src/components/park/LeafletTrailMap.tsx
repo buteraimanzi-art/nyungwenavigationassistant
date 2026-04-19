@@ -6,6 +6,7 @@ import { TRAIL_GPS_PATHS } from '@/lib/trail-gps-paths';
 import { RECEPTIONS, type Reception } from '@/lib/receptions';
 import type { NavStep } from '@/lib/navigation';
 import { MapLayerToggle, type MapLayer } from './MapLayerToggle';
+import { generateTrailLoop, getTrailColor } from '@/lib/trail-loops';
 
 const PARK_CENTER: [number, number] = [-2.45, 29.25];
 const PARK_ZOOM = 12;
@@ -115,9 +116,23 @@ export function LeafletTrailMap({ trail, userLocation, showDirections, chosenRec
         .addTo(layerGroup);
     });
 
+    // Per-trail unique color loop (round-trip, non-backtracking organic path)
+    const trailColor = getTrailColor(trail.id);
+    const loop = generateTrailLoop(trail);
+    const loopCoords: [number, number][] = loop.map((p) => [p.lat, p.lng]);
+    // Outbound half — solid
+    const half = Math.ceil(loopCoords.length / 2);
+    L.polyline(loopCoords.slice(0, half + 1), {
+      color: trailColor, weight: 5, opacity: 0.9,
+    }).addTo(layerGroup).bindPopup(`<strong>${trail.name}</strong><br/><span style="font-size:11px;">Outbound</span>`);
+    // Return half — same color, dashed so direction is clear
+    L.polyline(loopCoords.slice(half), {
+      color: trailColor, weight: 5, opacity: 0.9, dashArray: '10 6',
+    }).addTo(layerGroup).bindPopup(`<strong>${trail.name}</strong><br/><span style="font-size:11px;">Return path</span>`);
+
     // Trail start
     L.marker([trail.startPoint.lat, trail.startPoint.lng], { icon: trailStartIcon })
-      .bindPopup(`<strong>${trail.name}</strong><br/><span style="font-size:12px;">Trail start point</span>`)
+      .bindPopup(`<strong>${trail.name}</strong><br/><span style="font-size:12px;">Trail start &amp; end (loop)</span>`)
       .addTo(layerGroup);
 
     // Rest areas on trail
