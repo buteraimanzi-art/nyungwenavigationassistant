@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,84 +17,119 @@ const navLinks = [
 
 export function ParkHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-40 w-full bg-komoot-header">
-      <div className="container flex h-14 items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2.5">
-          <img src={nyungweLogo} alt="Nyungwe" className="w-9 h-9 rounded-full object-cover" />
-          <span className="hidden sm:inline font-bold text-lg tracking-tight text-komoot-header-foreground">
-            Nyungwe
-          </span>
+    <header
+      className={`sticky top-0 z-40 w-full transition-smooth border-b ${
+        scrolled
+          ? 'glass border-border/60 shadow-soft'
+          : 'bg-komoot-header/95 border-transparent'
+      }`}
+    >
+      <div className="container flex h-16 items-center justify-between px-4 md:px-8">
+        {/* Brand — left */}
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full gradient-primary opacity-0 group-hover:opacity-30 blur-md transition-smooth" />
+            <img
+              src={nyungweLogo}
+              alt="Nyungwe"
+              className="relative w-10 h-10 rounded-full object-cover ring-2 ring-border group-hover:ring-primary/40 transition-smooth"
+            />
+          </div>
+          <div className="flex flex-col leading-none">
+            <span className="font-bold text-lg tracking-tight text-komoot-header-foreground">
+              Nyungwe
+            </span>
+            <span className="hidden sm:inline text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-0.5">
+              National Park
+            </span>
+          </div>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map(link => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`text-sm font-medium transition-colors ${
-                location.pathname === link.to
-                  ? 'text-komoot-header-foreground border-b-2 border-komoot-header-foreground pb-0.5'
-                  : 'text-komoot-header-foreground/70 hover:text-komoot-header-foreground'
-              }`}
+        {/* Right cluster — nav + actions */}
+        <div className="flex items-center gap-2 md:gap-8">
+          <nav className="hidden md:flex items-center gap-7">
+            {navLinks.map((link) => {
+              const active = location.pathname === link.to;
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`nav-link-underline text-sm font-medium tracking-wide transition-smooth ${
+                    active
+                      ? 'active text-foreground'
+                      : 'text-foreground/65 hover:text-foreground'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="hidden md:block h-6 w-px bg-border/70" />
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="hidden sm:flex gap-1.5 rounded-full border-primary/30 text-primary bg-transparent hover:bg-primary hover:text-primary-foreground hover:border-primary px-4 font-medium transition-smooth"
             >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+              <Smartphone className="w-4 h-4" />
+              App
+            </Button>
 
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="hidden sm:flex gap-1.5 border-komoot-olive text-komoot-olive bg-transparent hover:bg-komoot-olive hover:text-primary-foreground rounded-full px-4 font-medium"
-          >
-            <Smartphone className="w-4 h-4" />
-            App
-          </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="sm"
+                  className="rounded-full gradient-primary text-primary-foreground hover:shadow-glow px-4 font-medium border-0 transition-smooth"
+                >
+                  <User className="w-4 h-4 mr-1.5" />
+                  <span className="hidden sm:inline">Sign in</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52 mt-2 shadow-floaty">
+                <DropdownMenuItem><Map className="w-4 h-4 mr-2" />My Trails</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Settings</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="rounded-full bg-komoot-header-foreground text-komoot-header hover:bg-komoot-header-foreground/90 px-4 font-medium"
-              >
-                <User className="w-4 h-4 mr-1.5" />
-                <span className="hidden sm:inline">Login or Signup</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem><Map className="w-4 h-4 mr-2" />My Trails</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden text-komoot-header-foreground"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden text-foreground"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </Button>
+          </div>
         </div>
       </div>
 
       {isMenuOpen && (
-        <div className="md:hidden bg-komoot-header border-t border-komoot-header-foreground/10">
+        <div className="md:hidden glass border-t border-border/60 animate-fade-in">
           <nav className="container flex flex-col py-3 px-4 space-y-1">
-            {navLinks.map(link => (
+            {navLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
-                className={`px-3 py-2.5 text-sm font-medium rounded-md ${
+                className={`px-4 py-3 text-sm font-medium rounded-lg transition-smooth ${
                   location.pathname === link.to
-                    ? 'text-komoot-header-foreground bg-komoot-header-foreground/10'
-                    : 'text-komoot-header-foreground/70 hover:bg-komoot-header-foreground/10'
+                    ? 'text-primary-foreground gradient-primary shadow-soft'
+                    : 'text-foreground/75 hover:bg-secondary'
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
