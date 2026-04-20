@@ -110,49 +110,88 @@ export default function Index() {
 
       {showTrailSelector ? (
         <main className="flex-1 flex flex-col">
-          {/* Hero */}
-          <div className="relative h-[70vh] min-h-[480px] flex items-center justify-center overflow-hidden">
+          {/* Hero — refined, cinematic */}
+          <div className="relative h-[88vh] min-h-[560px] flex items-center justify-center overflow-hidden">
             <div className="absolute inset-0">
-              <img src={nyungweHero} alt="" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-b from-komoot-header/60 via-komoot-header/30 to-komoot-header/70" />
+              <img src={nyungweHero} alt="" className="w-full h-full object-cover scale-105 animate-fade-in" />
+              <div className="absolute inset-0 gradient-hero" />
+              {/* Subtle vignette */}
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,hsl(30_18%_8%/0.5)_100%)]" />
             </div>
-            <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
-              <img src={nyungweLogo} alt="Nyungwe National Park" className="w-24 h-24 mx-auto mb-6 object-contain drop-shadow-lg" />
-              <h1 className="text-5xl md:text-7xl font-bold text-primary-foreground leading-tight tracking-tight mb-6">
-                Explore beyond the map
+
+            {/* Floating decorative orbs */}
+            <div className="absolute top-1/4 left-[10%] w-72 h-72 rounded-full bg-primary/20 blur-3xl animate-float" />
+            <div className="absolute bottom-1/4 right-[10%] w-96 h-96 rounded-full bg-accent/15 blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+
+            <div className="relative z-10 text-center px-4 max-w-4xl mx-auto animate-fade-in-up">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-dark border border-primary-foreground/15 mb-8">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent-glow animate-pulse" />
+                <span className="text-xs uppercase tracking-[0.25em] text-primary-foreground/85 font-medium">Rwanda · UNESCO Heritage</span>
+              </div>
+
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-primary-foreground leading-[1.05] tracking-tight mb-6 text-balance">
+                Explore beyond
+                <span className="block bg-gradient-to-r from-accent-glow via-primary-foreground to-accent bg-clip-text text-transparent">
+                  the map
+                </span>
               </h1>
-              <p className="text-lg md:text-xl text-primary-foreground/80 mb-8 uppercase tracking-[0.2em] text-sm font-medium">
-                Where will you explore next?
+
+              <p className="text-lg md:text-xl text-primary-foreground/85 mb-10 max-w-2xl mx-auto text-balance leading-relaxed">
+                Curated trails through one of Africa's oldest rainforests. Real GPS, audio guides, and community adventures.
               </p>
-              <div className="flex items-center justify-center gap-4">
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Button
-                  variant="outline"
                   size="lg"
-                  className="rounded-full border-primary-foreground/50 text-primary-foreground bg-transparent hover:bg-primary-foreground/10 px-8 font-semibold"
+                  className="rounded-full gradient-primary text-primary-foreground hover:shadow-glow px-8 font-semibold border-0 transition-smooth h-12"
                   onClick={() => document.getElementById('trails')?.scrollIntoView({ behavior: 'smooth' })}
                 >
                   Browse Routes
                 </Button>
                 <Button
+                  variant="outline"
                   size="lg"
-                  className="rounded-full bg-komoot-olive text-primary-foreground hover:bg-komoot-olive/90 px-8 font-semibold"
+                  className="rounded-full glass-dark border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 px-8 font-semibold transition-smooth h-12"
                   onClick={() => window.location.href = '/planner'}
                 >
                   Plan a Route
                 </Button>
               </div>
+
+              {/* Stat strip */}
+              <div className="mt-16 grid grid-cols-3 gap-6 max-w-xl mx-auto">
+                {[
+                  { v: '15+', l: 'Trails' },
+                  { v: '1,019', l: 'km² Forest' },
+                  { v: '13', l: 'Primates' },
+                ].map((s) => (
+                  <div key={s.l} className="text-center">
+                    <div className="text-2xl md:text-3xl font-bold text-primary-foreground">{s.v}</div>
+                    <div className="text-[10px] uppercase tracking-[0.2em] text-primary-foreground/60 mt-1">{s.l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Scroll indicator */}
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-float">
+              <div className="w-6 h-10 rounded-full border-2 border-primary-foreground/40 flex items-start justify-center p-1.5">
+                <div className="w-1 h-2 rounded-full bg-primary-foreground/70" />
+              </div>
             </div>
           </div>
 
           {/* Getting to Nyungwe */}
-          <div id="getting-there" className="bg-background py-12 border-b border-border">
+          <div id="getting-there" className="gradient-subtle py-20 border-b border-border/60">
             <div className="container max-w-6xl mx-auto px-4">
-              <div className="mb-6">
-                <p className="uppercase tracking-[0.15em] text-xs font-semibold text-muted-foreground mb-2">
-                  Plan your trip to the park
+              <div className="mb-8 max-w-2xl animate-fade-in-up">
+                <p className="uppercase tracking-[0.2em] text-xs font-semibold text-primary mb-3">
+                  · Plan your trip
                 </p>
-                <h2 className="text-3xl font-bold text-foreground">How to get to Nyungwe</h2>
-                <p className="text-muted-foreground mt-2 max-w-2xl">
+                <h2 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight text-balance">
+                  How to get to Nyungwe
+                </h2>
+                <p className="text-muted-foreground mt-3 leading-relaxed">
                   Tap a starting city to see the recommended driving route, distance, and travel time to the park entrances.
                 </p>
               </div>
@@ -161,23 +200,31 @@ export default function Index() {
           </div>
 
           {/* Trail cards */}
-          <div id="trails" className="bg-komoot-beige py-12 flex-1">
-            <div className="container max-w-5xl mx-auto px-4">
-              <div className="mb-8">
-                <p className="uppercase tracking-[0.15em] text-xs font-semibold text-muted-foreground mb-2">
-                  Choose your tour, download it to your smartphone
-                </p>
-                <div className="flex items-center justify-between">
-                  <h2 className="text-3xl font-bold text-foreground">Ready for your next adventure?</h2>
-                  <Badge variant="secondary" className="gap-1"><MapPin className="w-3 h-3" />{trails.length} routes</Badge>
+          <div id="trails" className="relative bg-komoot-beige py-20 flex-1 overflow-hidden">
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl -translate-y-1/2 translate-x-1/3" />
+            <div className="container max-w-6xl mx-auto px-4 relative">
+              <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-fade-in-up">
+                <div className="max-w-2xl">
+                  <p className="uppercase tracking-[0.2em] text-xs font-semibold text-primary mb-3">
+                    · Curated experiences
+                  </p>
+                  <h2 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight text-balance">
+                    Ready for your next adventure?
+                  </h2>
+                  <p className="text-muted-foreground mt-3 leading-relaxed">
+                    Choose your tour, download it to your smartphone, and head into the canopy.
+                  </p>
                 </div>
+                <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 rounded-full self-start md:self-auto shadow-soft">
+                  <MapPin className="w-3.5 h-3.5" />{trails.length} routes
+                </Badge>
               </div>
               <TrailSelector trails={trails} selectedTrailId={selectedTrail?.id} onSelectTrail={handleSelectTrail} />
             </div>
           </div>
 
           {/* Community adventures from Relive */}
-          <div className="bg-background border-b border-border">
+          <div className="gradient-subtle border-b border-border/60">
             <ReliveCommunityFeed limit={6} />
           </div>
 
