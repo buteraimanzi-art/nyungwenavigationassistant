@@ -6,7 +6,7 @@ import { TRAIL_GPS_PATHS } from '@/lib/trail-gps-paths';
 import { RECEPTIONS, type Reception } from '@/lib/receptions';
 import type { NavStep } from '@/lib/navigation';
 import { MapLayerToggle, type MapLayer } from './MapLayerToggle';
-import { generateTrailLoop, getTrailColor } from '@/lib/trail-loops';
+import { generateTrailLoop, getTrailColor, NYUNGWE_FOREST_BOUNDS } from '@/lib/trail-loops';
 
 const PARK_CENTER: [number, number] = [-2.45, 29.25];
 const PARK_ZOOM = 12;
