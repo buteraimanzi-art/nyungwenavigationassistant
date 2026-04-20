@@ -1,4 +1,5 @@
 import type { Trail, Attraction, RestArea } from './types';
+import { NYUNGWE_FOREST_BOUNDS } from './trail-loops';
 
 export const MAP_BOUNDS = {
   north: -2.35,
@@ -26,13 +27,42 @@ interface OfficialTrailSeed {
   elevationGain?: number;
 }
 
+const ANCHOR_MARGIN = 0.012;
+
+/** Pull anchors that sit on/outside the forest edge inwards. */
+function clampAnchor(a: { lat: number; lng: number }) {
+  return {
+    lat: Math.min(
+      NYUNGWE_FOREST_BOUNDS.north - ANCHOR_MARGIN,
+      Math.max(NYUNGWE_FOREST_BOUNDS.south + ANCHOR_MARGIN, a.lat),
+    ),
+    lng: Math.min(
+      NYUNGWE_FOREST_BOUNDS.east - ANCHOR_MARGIN,
+      Math.max(NYUNGWE_FOREST_BOUNDS.west + ANCHOR_MARGIN, a.lng),
+    ),
+  };
+}
+
+/** Maximum loop radius (deg) that fits inside the forest from this anchor. */
+function maxRadiusForAnchor(a: { lat: number; lng: number }): number {
+  const room = Math.min(
+    a.lat - (NYUNGWE_FOREST_BOUNDS.south + 0.008),
+    (NYUNGWE_FOREST_BOUNDS.north - 0.008) - a.lat,
+    a.lng - (NYUNGWE_FOREST_BOUNDS.west + 0.008),
+    (NYUNGWE_FOREST_BOUNDS.east - 0.008) - a.lng,
+  );
+  return Math.max(0.001, room * 0.9);
+}
+
 /**
  * Sample N evenly-spaced points along a trail-like organic loop around `anchor`.
- * Mirrors the geometry produced by `generateTrailLoop` so that rest areas and
- * attractions actually sit on the rendered trail line.
+ * Loop radius is clamped so positions stay inside the forest, matching what
+ * `generateTrailLoop` produces.
  */
 function sampleLoopPositions(seed: OfficialTrailSeed, count: number, phase: number): { lat: number; lng: number }[] {
-  const radiusDeg = Math.max(0.0015, seed.distanceKm / (2 * Math.PI * 111));
+  const anchor = clampAnchor(seed.anchor);
+  const desired = seed.distanceKm / (2 * Math.PI * 111);
+  const radiusDeg = Math.min(Math.max(0.0015, desired), maxRadiusForAnchor(anchor));
   const seedNum = seed.id.split('').reduce((acc, c, i) => acc + c.charCodeAt(0) * (i + 1), 0);
   const rand = (i: number) => {
     const x = Math.sin(seedNum * 0.013 + i * 1.7) * 10000;
@@ -41,14 +71,12 @@ function sampleLoopPositions(seed: OfficialTrailSeed, count: number, phase: numb
   const out: { lat: number; lng: number }[] = [];
   for (let i = 1; i <= count; i++) {
     const t = i / (count + 1);
-    // Spread across full loop (0 → 2π), offset by phase so attractions and
-    // rest areas don't stack on the same spots.
     const angle = 2 * Math.PI * t + phase;
-    const noise = (rand(i * 7) - 0.5) * 0.3;
+    const noise = (rand(i * 7) - 0.5) * 0.25;
     const r = radiusDeg * (1 + noise);
     out.push({
-      lat: seed.anchor.lat + Math.sin(angle) * r * 0.85,
-      lng: seed.anchor.lng + Math.cos(angle) * r,
+      lat: anchor.lat + Math.sin(angle) * r * 0.85,
+      lng: anchor.lng + Math.cos(angle) * r,
     });
   }
   return out;
