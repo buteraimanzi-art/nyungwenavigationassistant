@@ -141,9 +141,11 @@ function createStaticTrail(seed: OfficialTrailSeed): Trail {
   const totalDistance = Math.round(seed.distanceKm * 1000);
   const elevation = seed.elevationGain || Math.round(seed.distanceKm * 35);
   const duration = seed.durationMin || Math.round(seed.distanceKm * 18);
+  const anchor = clampAnchor(seed.anchor);
+  const seedWithAnchor = { ...seed, anchor };
   const point = {
-    lat: seed.anchor.lat,
-    lng: seed.anchor.lng,
+    lat: anchor.lat,
+    lng: anchor.lng,
     elevation: 1900 + Math.sin(seed.id.length * 3.7) * 300,
     distanceFromStart: 0,
   };
@@ -156,11 +158,11 @@ function createStaticTrail(seed: OfficialTrailSeed): Trail {
     totalDistance,
     estimatedDuration: duration,
     elevationGain: elevation,
-    startPoint: seed.anchor,
-    endPoint: seed.anchor,
+    startPoint: anchor,
+    endPoint: anchor,
     path: [point],
-    attractions: generateAttractions(seed),
-    restAreas: generateRestAreas(seed),
+    attractions: generateAttractions(seedWithAnchor),
+    restAreas: generateRestAreas(seedWithAnchor),
   };
 }
 
