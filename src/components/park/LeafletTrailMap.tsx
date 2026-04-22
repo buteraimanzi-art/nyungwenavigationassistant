@@ -112,6 +112,20 @@ export function LeafletTrailMap({ trail, userLocation, showDirections, chosenRec
     tileLayerRef.current = L.tileLayer(tile.url, { attribution: tile.attr }).addTo(map);
   }, [mapLayer]);
 
+  // Force the map to recompute its size whenever the trail changes or the
+  // bottom sheet opens/closes (parent passes a changing `resizeTrigger`).
+  // We invalidate across the 300ms CSS transition so tiles stay aligned.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const timers = [0, 80, 180, 320, 600].map((d) =>
+      window.setTimeout(() => {
+        map.invalidateSize();
+      }, d),
+    );
+    return () => timers.forEach((t) => window.clearTimeout(t));
+  }, [resizeTrigger, trail.id]);
+
   useEffect(() => {
     const map = mapRef.current;
     const layerGroup = layerGroupRef.current;
