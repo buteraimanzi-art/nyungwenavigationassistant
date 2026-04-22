@@ -29,6 +29,8 @@ interface LeafletTrailMapProps {
   routeGeometry?: { lat: number; lng: number }[] | null;
   onSelectAttraction?: (a: Attraction) => void;
   onSelectRestArea?: (r: RestArea) => void;
+  /** Change this value (e.g. trail.id, sheet-open boolean) to force the map to recompute its size. */
+  resizeTrigger?: string | number | boolean;
 }
 
 function createDivIcon(label: string, background: string, size = 32) {
@@ -59,7 +61,7 @@ function createStepIcon(num: number, isActive: boolean) {
   });
 }
 
-export function LeafletTrailMap({ trail, userLocation, showDirections, chosenReception, navSteps, routeGeometry }: LeafletTrailMapProps) {
+export function LeafletTrailMap({ trail, userLocation, showDirections, chosenReception, navSteps, routeGeometry, resizeTrigger }: LeafletTrailMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerGroupRef = useRef<L.LayerGroup | null>(null);
@@ -109,6 +111,20 @@ export function LeafletTrailMap({ trail, userLocation, showDirections, chosenRec
     const tile = TILE_URLS[mapLayer];
     tileLayerRef.current = L.tileLayer(tile.url, { attribution: tile.attr }).addTo(map);
   }, [mapLayer]);
+
+  // Force the map to recompute its size whenever the trail changes or the
+  // bottom sheet opens/closes (parent passes a changing `resizeTrigger`).
+  // We invalidate across the 300ms CSS transition so tiles stay aligned.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const timers = [0, 80, 180, 320, 600].map((d) =>
+      window.setTimeout(() => {
+        map.invalidateSize();
+      }, d),
+    );
+    return () => timers.forEach((t) => window.clearTimeout(t));
+  }, [resizeTrigger, trail.id]);
 
   useEffect(() => {
     const map = mapRef.current;
