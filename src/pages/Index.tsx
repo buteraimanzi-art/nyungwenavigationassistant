@@ -111,7 +111,7 @@ export default function Index() {
       {showTrailSelector ? (
         <main className="flex-1 flex flex-col">
           {/* Hero — refined, cinematic */}
-          <div className="relative h-[88vh] min-h-[560px] flex items-center justify-center overflow-hidden">
+          <div className="relative h-[70vh] sm:h-[80vh] md:h-[88vh] min-h-[460px] sm:min-h-[520px] flex items-center justify-center overflow-hidden">
             <div className="absolute inset-0">
               <img src={nyungweHero} alt="" className="w-full h-full object-cover scale-105 animate-fade-in" />
               <div className="absolute inset-0 gradient-hero" />
@@ -119,31 +119,31 @@ export default function Index() {
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,hsl(30_18%_8%/0.5)_100%)]" />
             </div>
 
-            {/* Floating decorative orbs */}
-            <div className="absolute top-1/4 left-[10%] w-72 h-72 rounded-full bg-primary/20 blur-3xl animate-float" />
-            <div className="absolute bottom-1/4 right-[10%] w-96 h-96 rounded-full bg-accent/15 blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+            {/* Floating decorative orbs (hidden on tiny screens to reduce repaint cost) */}
+            <div className="hidden sm:block absolute top-1/4 left-[10%] w-72 h-72 rounded-full bg-primary/20 blur-3xl animate-float" />
+            <div className="hidden sm:block absolute bottom-1/4 right-[10%] w-96 h-96 rounded-full bg-accent/15 blur-3xl animate-float" style={{ animationDelay: '2s' }} />
 
             <div className="relative z-10 text-center px-4 max-w-4xl mx-auto animate-fade-in-up">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-dark border border-primary-foreground/15 mb-8">
+              <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full glass-dark border border-primary-foreground/15 mb-6 sm:mb-8">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent-glow animate-pulse" />
-                <span className="text-xs uppercase tracking-[0.25em] text-primary-foreground/85 font-medium">Rwanda · UNESCO Heritage</span>
+                <span className="text-[10px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.25em] text-primary-foreground/85 font-medium">Rwanda · UNESCO Heritage</span>
               </div>
 
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-primary-foreground leading-[1.05] tracking-tight mb-6 text-balance">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-primary-foreground leading-[1.05] tracking-tight mb-4 sm:mb-6 text-balance">
                 Explore beyond
                 <span className="block bg-gradient-to-r from-accent-glow via-primary-foreground to-accent bg-clip-text text-transparent">
                   the map
                 </span>
               </h1>
 
-              <p className="text-lg md:text-xl text-primary-foreground/85 mb-10 max-w-2xl mx-auto text-balance leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl text-primary-foreground/85 mb-8 sm:mb-10 max-w-2xl mx-auto text-balance leading-relaxed px-2">
                 Curated trails through one of Africa's oldest rainforests. Real GPS, audio guides, and community adventures.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 px-4">
                 <Button
                   size="lg"
-                  className="rounded-full gradient-primary text-primary-foreground hover:shadow-glow px-8 font-semibold border-0 transition-smooth h-12"
+                  className="w-full sm:w-auto rounded-full gradient-primary text-primary-foreground hover:shadow-glow px-8 font-semibold border-0 transition-smooth h-12"
                   onClick={() => document.getElementById('trails')?.scrollIntoView({ behavior: 'smooth' })}
                 >
                   Browse Routes
@@ -151,7 +151,7 @@ export default function Index() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="rounded-full glass-dark border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 px-8 font-semibold transition-smooth h-12"
+                  className="w-full sm:w-auto rounded-full glass-dark border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 px-8 font-semibold transition-smooth h-12"
                   onClick={() => window.location.href = '/planner'}
                 >
                   Plan a Route
@@ -159,22 +159,22 @@ export default function Index() {
               </div>
 
               {/* Stat strip */}
-              <div className="mt-16 grid grid-cols-3 gap-6 max-w-xl mx-auto">
+              <div className="mt-10 sm:mt-16 grid grid-cols-3 gap-4 sm:gap-6 max-w-xl mx-auto">
                 {[
                   { v: '15+', l: 'Trails' },
                   { v: '1,019', l: 'km² Forest' },
                   { v: '13', l: 'Primates' },
                 ].map((s) => (
                   <div key={s.l} className="text-center">
-                    <div className="text-2xl md:text-3xl font-bold text-primary-foreground">{s.v}</div>
-                    <div className="text-[10px] uppercase tracking-[0.2em] text-primary-foreground/60 mt-1">{s.l}</div>
+                    <div className="text-xl sm:text-2xl md:text-3xl font-bold text-primary-foreground">{s.v}</div>
+                    <div className="text-[9px] sm:text-[10px] uppercase tracking-[0.15em] sm:tracking-[0.2em] text-primary-foreground/60 mt-1">{s.l}</div>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Scroll indicator */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-float">
+            <div className="hidden sm:block absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-float">
               <div className="w-6 h-10 rounded-full border-2 border-primary-foreground/40 flex items-start justify-center p-1.5">
                 <div className="w-1 h-2 rounded-full bg-primary-foreground/70" />
               </div>
@@ -182,16 +182,16 @@ export default function Index() {
           </div>
 
           {/* Getting to Nyungwe */}
-          <div id="getting-there" className="gradient-subtle py-20 border-b border-border/60">
+          <div id="getting-there" className="gradient-subtle py-12 sm:py-20 border-b border-border/60">
             <div className="container max-w-6xl mx-auto px-4">
-              <div className="mb-8 max-w-2xl animate-fade-in-up">
+              <div className="mb-6 sm:mb-8 max-w-2xl animate-fade-in-up">
                 <p className="uppercase tracking-[0.2em] text-xs font-semibold text-primary mb-3">
                   · Plan your trip
                 </p>
-                <h2 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight text-balance">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground tracking-tight text-balance">
                   How to get to Nyungwe
                 </h2>
-                <p className="text-muted-foreground mt-3 leading-relaxed">
+                <p className="text-muted-foreground mt-3 leading-relaxed text-sm sm:text-base">
                   Tap a starting city to see the recommended driving route, distance, and travel time to the park entrances.
                 </p>
               </div>
@@ -200,18 +200,18 @@ export default function Index() {
           </div>
 
           {/* Trail cards */}
-          <div id="trails" className="relative bg-komoot-beige py-20 flex-1 overflow-hidden">
+          <div id="trails" className="relative bg-komoot-beige py-12 sm:py-20 flex-1 overflow-hidden">
             <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl -translate-y-1/2 translate-x-1/3" />
             <div className="container max-w-6xl mx-auto px-4 relative">
-              <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-fade-in-up">
+              <div className="mb-8 sm:mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-fade-in-up">
                 <div className="max-w-2xl">
                   <p className="uppercase tracking-[0.2em] text-xs font-semibold text-primary mb-3">
                     · Curated experiences
                   </p>
-                  <h2 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight text-balance">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground tracking-tight text-balance">
                     Ready for your next adventure?
                   </h2>
-                  <p className="text-muted-foreground mt-3 leading-relaxed">
+                  <p className="text-muted-foreground mt-3 leading-relaxed text-sm sm:text-base">
                     Choose your tour, download it to your smartphone, and head into the canopy.
                   </p>
                 </div>
@@ -276,20 +276,29 @@ export default function Index() {
 
           {/* Mobile */}
           <div className="md:hidden flex-1 flex flex-col relative">
-            <div className="p-3 border-b border-border bg-card flex items-center justify-between">
-              <Button variant="ghost" size="sm" onClick={handleBackToTrails} className="gap-1 -ml-2"><ArrowLeft className="w-4 h-4" /></Button>
-              <CurrentTrailBadge trail={selectedTrail} />
-              {userLocation && <Badge variant="outline" className="gap-1 border-komoot-olive text-komoot-olive"><div className="w-2 h-2 rounded-full bg-komoot-olive animate-pulse" />GPS</Badge>}
+            <div className="p-3 border-b border-border bg-card flex items-center justify-between gap-2">
+              <Button variant="ghost" size="sm" onClick={handleBackToTrails} className="gap-1 -ml-2 shrink-0"><ArrowLeft className="w-4 h-4" /></Button>
+              <div className="min-w-0 flex-1 flex justify-center"><CurrentTrailBadge trail={selectedTrail} /></div>
+              {userLocation && <Badge variant="outline" className="gap-1 border-komoot-olive text-komoot-olive shrink-0 px-2"><div className="w-2 h-2 rounded-full bg-komoot-olive animate-pulse" />GPS</Badge>}
             </div>
-            <div className="flex-1 relative">
+            <div className="flex-1 relative min-h-[300px]">
               <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} routeGeometry={routeGeometry} />
             </div>
             <ElevationProfile trail={selectedTrail} />
-            <div className={`absolute left-0 right-0 bottom-0 bg-card border-t border-border rounded-t-2xl shadow-lg transition-all duration-300 ${isBottomSheetExpanded ? 'h-[70vh]' : 'h-[260px]'}`}>
-              <button className="w-full flex justify-center py-2" onClick={() => setIsBottomSheetExpanded(!isBottomSheetExpanded)}>
+            <div className={`absolute left-0 right-0 bottom-0 bg-card border-t border-border rounded-t-2xl shadow-2xl transition-all duration-300 z-20 ${isBottomSheetExpanded ? 'h-[75vh]' : 'h-[64px]'}`}>
+              <button
+                className="w-full flex flex-col items-center gap-1 py-2"
+                onClick={() => setIsBottomSheetExpanded(!isBottomSheetExpanded)}
+                aria-label={isBottomSheetExpanded ? 'Collapse details' : 'Expand details'}
+              >
                 <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
+                {!isBottomSheetExpanded && (
+                  <span className="text-xs font-medium text-foreground/80 truncate px-4">Tap for trail details</span>
+                )}
               </button>
-              <div className="overflow-y-auto px-4 pb-24" style={{ height: 'calc(100% - 32px)' }}>{sideContent}</div>
+              {isBottomSheetExpanded && (
+                <div className="overflow-y-auto px-4 pb-32" style={{ height: 'calc(100% - 32px)' }}>{sideContent}</div>
+              )}
             </div>
             <EmergencySOS userLocation={userLocation} trailId={selectedTrail.id} trailName={selectedTrail.name} />
             <VoiceAssistant trail={selectedTrail} userLocation={userLocation} progress={trailProgress} isNavigating={isNavigating} />

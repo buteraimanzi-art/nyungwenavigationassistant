@@ -49,7 +49,7 @@ export function EmergencySOS({ userLocation, trailId, trailName }: Props) {
 
   return (
     <>
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+      <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50">
         <div className="relative">
           {isHolding && (
             <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">

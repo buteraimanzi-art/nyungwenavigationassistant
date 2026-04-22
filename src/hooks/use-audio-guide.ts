@@ -17,9 +17,11 @@ interface Options {
 
 /**
  * Auto-narrating audio guide using browser SpeechSynthesis.
- * Speaks a short description when the user comes within `radius`
- * of an attraction or rest area on the active trail. Each point is
- * narrated only once per session unless reset.
+ *
+ * IMPORTANT: Browsers block speechSynthesis.speak() unless the very
+ * first utterance has been kicked off from a user gesture. The hook
+ * exposes `prime()` which MUST be called inside an onClick handler
+ * (synchronously) before any automatic narration can succeed.
  */
 export function useAudioGuide(
   trail: Trail | null,
@@ -30,22 +32,61 @@ export function useAudioGuide(
   const radius = opts.radius ?? 60;
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [lastSpoken, setLastSpoken] = useState<string | null>(null);
+  const [primed, setPrimed] = useState(false);
   const spokenRef = useRef<Set<string>>(new Set());
   const supported = typeof window !== 'undefined' && 'speechSynthesis' in window;
 
   const speak = useCallback(
     (text: string) => {
       if (!supported) return;
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.rate = 0.95;
-      u.pitch = 1;
-      u.volume = 1;
-      u.onstart = () => setIsSpeaking(true);
-      u.onend = () => setIsSpeaking(false);
-      u.onerror = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(u);
-      setLastSpoken(text);
+      try {
+        // Resume in case the engine was paused by the OS / tab switch
+        window.speechSynthesis.resume();
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.95;
+        u.pitch = 1;
+        u.volume = 1;
+        u.lang = 'en-US';
+        u.onstart = () => setIsSpeaking(true);
+        u.onend = () => setIsSpeaking(false);
+        u.onerror = () => setIsSpeaking(false);
+        window.speechSynthesis.speak(u);
+        setLastSpoken(text);
+      } catch {
+        setIsSpeaking(false);
+      }
+    },
+    [supported],
+  );
+
+  /**
+   * Must be called from a user gesture (button click). Speaks a short
+   * welcome line so the audio engine is unlocked for later automatic
+   * narrations triggered by location changes.
+   */
+  const prime = useCallback(
+    (welcome?: string) => {
+      if (!supported) return;
+      try {
+        window.speechSynthesis.resume();
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(
+          welcome ?? 'Audio guide enabled. I will narrate points of interest as you approach them.',
+        );
+        u.rate = 0.95;
+        u.pitch = 1;
+        u.volume = 1;
+        u.lang = 'en-US';
+        u.onstart = () => setIsSpeaking(true);
+        u.onend = () => setIsSpeaking(false);
+        u.onerror = () => setIsSpeaking(false);
+        window.speechSynthesis.speak(u);
+        setLastSpoken(u.text);
+        setPrimed(true);
+      } catch {
+        // ignore
+      }
     },
     [supported],
   );
@@ -63,7 +104,7 @@ export function useAudioGuide(
 
   // Auto-narrate when entering a trigger radius
   useEffect(() => {
-    if (!enabled || !trail || !userLocation || !supported) return;
+    if (!enabled || !primed || !trail || !userLocation || !supported) return;
     const points: AudioPoint[] = [
       ...trail.attractions.map<AudioPoint>((a: Attraction) => ({
         id: a.id,
@@ -91,15 +132,15 @@ export function useAudioGuide(
             ? `You are approaching ${p.name}.`
             : `Rest area ahead: ${p.name}.`;
         speak(`${intro} ${p.description}`);
-        break; // only speak one per location update
+        break;
       }
     }
-  }, [enabled, trail, userLocation, radius, supported, speak]);
+  }, [enabled, primed, trail, userLocation, radius, supported, speak]);
 
   // Stop speaking if disabled
   useEffect(() => {
     if (!enabled) stop();
   }, [enabled, stop]);
 
-  return { isSpeaking, lastSpoken, supported, speak, stop, reset };
+  return { isSpeaking, lastSpoken, supported, primed, speak, prime, stop, reset };
 }

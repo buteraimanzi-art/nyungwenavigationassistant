@@ -6,7 +6,8 @@ import { TRAIL_GPS_PATHS } from '@/lib/trail-gps-paths';
 import { RECEPTIONS, type Reception } from '@/lib/receptions';
 import type { NavStep } from '@/lib/navigation';
 import { MapLayerToggle, type MapLayer } from './MapLayerToggle';
-import { generateTrailLoop, getTrailColor, NYUNGWE_FOREST_BOUNDS } from '@/lib/trail-loops';
+import { generateTrailLoop, getTrailColor } from '@/lib/trail-loops';
+import { NYUNGWE_POLYGON_LATLNG } from '@/lib/nyungwe-boundary';
 
 const PARK_CENTER: [number, number] = [-2.45, 29.25];
 const PARK_ZOOM = 12;
@@ -97,12 +98,18 @@ export function LeafletTrailMap({ trail, userLocation, showDirections, chosenRec
     if (!map || !layerGroup) return;
     layerGroup.clearLayers();
 
-    // Nyungwe forest boundary — soft green outline so users see trails stay inside
-    const b = NYUNGWE_FOREST_BOUNDS;
-    L.rectangle(
-      [[b.south, b.west], [b.north, b.east]],
-      { color: '#15803d', weight: 2, opacity: 0.55, fillColor: '#22c55e', fillOpacity: 0.05, dashArray: '6 6' },
-    ).addTo(layerGroup).bindPopup('<strong>Nyungwe National Park</strong><br/><span style="font-size:11px;">Forest boundary</span>');
+    // Nyungwe forest boundary — realistic polygon outline so users see trails stay inside
+    L.polygon(NYUNGWE_POLYGON_LATLNG, {
+      color: '#15803d',
+      weight: 2.5,
+      opacity: 0.7,
+      fillColor: '#22c55e',
+      fillOpacity: 0.07,
+      dashArray: '6 6',
+      smoothFactor: 1,
+    })
+      .addTo(layerGroup)
+      .bindPopup('<strong>Nyungwe National Park</strong><br/><span style="font-size:11px;">Forest boundary (approx.)</span>');
 
     roadPaths.forEach((path) => {
       L.polyline(path.coords, { color: '#dc2626', weight: 3, opacity: 0.6, dashArray: '8 4' }).addTo(layerGroup);
