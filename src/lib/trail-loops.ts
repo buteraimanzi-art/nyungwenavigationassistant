@@ -1,64 +1,60 @@
 import type { Coordinates, Trail } from './types';
 import { calculateDistance } from './trail-data';
+import {
+  NYUNGWE_BBOX,
+  NYUNGWE_CENTROID,
+  clampToNyungwePolygon,
+  pointInNyungwe,
+} from './nyungwe-boundary';
 
 /**
- * Approximate Nyungwe National Park boundary (simplified polygon).
- * Used to keep all generated trail loops inside the forest.
+ * Backwards-compatible bbox export — some callers (and the map) used
+ * NYUNGWE_FOREST_BOUNDS to draw the boundary. We keep it for layout
+ * code, but the source of truth is now the polygon.
  */
-export const NYUNGWE_FOREST_BOUNDS = {
-  north: -2.36,
-  south: -2.54,
-  west: 29.10,
-  east: 29.42,
-};
+export const NYUNGWE_FOREST_BOUNDS = NYUNGWE_BBOX;
 
-/** Center of the forest, used as a fallback anchor for clamping. */
-const FOREST_CENTER = {
-  lat: (NYUNGWE_FOREST_BOUNDS.north + NYUNGWE_FOREST_BOUNDS.south) / 2,
-  lng: (NYUNGWE_FOREST_BOUNDS.west + NYUNGWE_FOREST_BOUNDS.east) / 2,
-};
-
-/** Inset margin (degrees) so trails never touch the very edge. */
-const EDGE_MARGIN = 0.008;
+const FOREST_CENTER = NYUNGWE_CENTROID;
 
 function clampToForest(p: Coordinates): Coordinates {
-  return {
-    lat: Math.min(
-      NYUNGWE_FOREST_BOUNDS.north - EDGE_MARGIN,
-      Math.max(NYUNGWE_FOREST_BOUNDS.south + EDGE_MARGIN, p.lat),
-    ),
-    lng: Math.min(
-      NYUNGWE_FOREST_BOUNDS.east - EDGE_MARGIN,
-      Math.max(NYUNGWE_FOREST_BOUNDS.west + EDGE_MARGIN, p.lng),
-    ),
-  };
+  return clampToNyungwePolygon(p);
 }
 
 /**
- * Maximum loop radius (degrees) that still fits comfortably inside the forest
- * given an anchor. Computed as the smaller of the available room in each
- * cardinal direction, with a safety factor.
+ * Maximum loop radius (degrees) that still fits inside the polygon
+ * given an anchor. Approximated by sampling the available room in
+ * 16 directions and taking the smallest distance to the boundary.
  */
 function maxRadiusForAnchor(anchor: Coordinates): number {
-  const room = Math.min(
-    anchor.lat - (NYUNGWE_FOREST_BOUNDS.south + EDGE_MARGIN),
-    (NYUNGWE_FOREST_BOUNDS.north - EDGE_MARGIN) - anchor.lat,
-    anchor.lng - (NYUNGWE_FOREST_BOUNDS.west + EDGE_MARGIN),
-    (NYUNGWE_FOREST_BOUNDS.east - EDGE_MARGIN) - anchor.lng,
-  );
-  return Math.max(0.001, room * 0.9);
+  if (!pointInNyungwe(anchor)) return 0.005;
+  let minR = 0.05;
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * Math.PI * 2;
+    let lo = 0, hi = 0.1; // search up to ~11km in degrees
+    // Find the largest hi inside the polygon
+    while (hi - lo > 0.0005) {
+      const mid = (lo + hi) / 2;
+      const test: Coordinates = {
+        lat: anchor.lat + Math.sin(a) * mid,
+        lng: anchor.lng + Math.cos(a) * mid,
+      };
+      if (pointInNyungwe(test)) lo = mid;
+      else hi = mid;
+    }
+    if (lo < minR) minR = lo;
+  }
+  return Math.max(0.001, minR * 0.85);
 }
 
 /**
  * Generate an organic round-trip loop for a trail that stays INSIDE the
- * Nyungwe forest boundary. Outbound and return paths follow different
+ * Nyungwe forest polygon. Outbound and return paths follow different
  * curved arcs around the trail anchor, and very long trails are folded
  * into a serpentine pattern so they don't spill outside the park.
  */
 export function generateTrailLoop(trail: Trail): Coordinates[] {
   const anchor = clampToForest(trail.startPoint || FOREST_CENTER);
 
-  // Desired radius if the loop were a perfect circle (deg)
   const desiredRadiusDeg = (trail.totalDistance / 1000) / (2 * Math.PI * 111);
   const maxR = maxRadiusForAnchor(anchor);
 
@@ -70,13 +66,10 @@ export function generateTrailLoop(trail: Trail): Coordinates[] {
     return x - Math.floor(x);
   };
 
-  // If the trail comfortably fits as a single loop, use the simple shape.
   if (desiredRadiusDeg <= maxR * 0.95) {
     const radiusDeg = Math.max(0.0015, desiredRadiusDeg);
     return buildSimpleLoop(anchor, radiusDeg, rand);
   }
-
-  // Otherwise, fold into a serpentine that fills the available room.
   return buildSerpentineLoop(anchor, maxR, rand, seedNum);
 }
 
@@ -115,27 +108,21 @@ function buildSimpleLoop(
   return points;
 }
 
-/**
- * Long trails (Congo–Nile, Nshili, Cyinzobe, Uwinka…) get a serpentine
- * shape that fills the available bounded room without leaving the forest.
- */
 function buildSerpentineLoop(
   center: Coordinates,
   maxR: number,
   rand: (i: number) => number,
   seedNum: number,
 ): Coordinates[] {
-  // Bounding box around the center, fully inside the forest.
   const halfW = maxR;
   const halfH = maxR * 0.78;
-  const sweeps = 4 + (seedNum % 3); // 4-6 vertical sweeps
+  const sweeps = 4 + (seedNum % 3);
   const ptsPerSweep = 14;
 
   const points: Coordinates[] = [center];
 
-  // Outbound: serpentine left-right across the box, going north
   for (let s = 0; s < sweeps; s++) {
-    const yT = s / (sweeps - 1); // 0 → 1 (south → north of box)
+    const yT = s / (sweeps - 1);
     const lat = center.lat - halfH + 2 * halfH * yT;
     const goingRight = s % 2 === 0;
     for (let i = 0; i < ptsPerSweep; i++) {
@@ -143,13 +130,10 @@ function buildSerpentineLoop(
       const xT = goingRight ? t : 1 - t;
       const lng = center.lng - halfW + 2 * halfW * xT;
       const noise = (rand(s * 13 + i * 3) - 0.5) * maxR * 0.08;
-      points.push(
-        clampToForest({ lat: lat + noise, lng: lng + noise * 0.6 }),
-      );
+      points.push(clampToForest({ lat: lat + noise, lng: lng + noise * 0.6 }));
     }
   }
 
-  // Return: a curved arc back along the southern half so it doesn't retrace
   const returnPts = 22;
   for (let i = 1; i <= returnPts; i++) {
     const t = i / returnPts;
