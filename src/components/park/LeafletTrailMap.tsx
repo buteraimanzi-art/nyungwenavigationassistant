@@ -61,7 +61,7 @@ function createStepIcon(num: number, isActive: boolean) {
   });
 }
 
-export function LeafletTrailMap({ trail, userLocation, showDirections, chosenReception, navSteps, routeGeometry }: LeafletTrailMapProps) {
+export function LeafletTrailMap({ trail, userLocation, showDirections, chosenReception, navSteps, routeGeometry, resizeTrigger }: LeafletTrailMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerGroupRef = useRef<L.LayerGroup | null>(null);
