@@ -283,7 +283,7 @@ export default function Index() {
             </div>
             {/* Map fills the entire remaining viewport behind the bottom sheet */}
             <div className="flex-1 relative min-h-[300px]">
-              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} routeGeometry={routeGeometry} />
+              <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} routeGeometry={routeGeometry} resizeTrigger={`mobile-${selectedTrail.id}-${isBottomSheetExpanded ? 'open' : 'closed'}`} />
             </div>
             <div className={`absolute left-0 right-0 bottom-0 bg-card border-t border-border rounded-t-2xl shadow-2xl transition-all duration-300 z-20 ${isBottomSheetExpanded ? 'h-[75vh]' : 'h-[64px]'}`}>
               <button
