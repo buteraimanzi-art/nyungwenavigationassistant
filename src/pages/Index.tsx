@@ -20,7 +20,7 @@ import type { Reception } from '@/lib/receptions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Navigation, ArrowLeft, X } from 'lucide-react';
+import { MapPin, Navigation, ArrowLeft, X, ChevronUp, ChevronDown, Clock, Mountain, Footprints } from 'lucide-react';
 import nyungweHero from '@/assets/nyungwe-hero.jpg';
 import nyungweLogo from '@/assets/nyungwe-logo.webp';
 
@@ -48,6 +48,32 @@ export default function Index() {
     if (!selectedTrail || !userLocation || selectedTrail.path.length < 2) return null;
     return calculateTrailProgress(userLocation, selectedTrail);
   }, [selectedTrail, userLocation]);
+
+  const mobileTrailStats = useMemo(() => {
+    if (!selectedTrail) return [];
+
+    return [
+      {
+        key: 'distance',
+        icon: Footprints,
+        label: selectedTrail.totalDistance < 1000
+          ? `${Math.round(selectedTrail.totalDistance)}m`
+          : `${(selectedTrail.totalDistance / 1000).toFixed(1)}km`,
+      },
+      ...(selectedTrail.estimatedDuration > 0
+        ? [{
+            key: 'duration',
+            icon: Clock,
+            label: selectedTrail.estimatedDuration < 60
+              ? `${selectedTrail.estimatedDuration} min`
+              : `${Math.floor(selectedTrail.estimatedDuration / 60)}h${selectedTrail.estimatedDuration % 60 ? ` ${selectedTrail.estimatedDuration % 60}m` : ''}`,
+          }]
+        : []),
+      ...(selectedTrail.elevationGain > 0
+        ? [{ key: 'elevation', icon: Mountain, label: `${selectedTrail.elevationGain}m climb` }]
+        : []),
+    ];
+  }, [selectedTrail]);
 
   const handleSelectTrail = (trail: Trail) => {
     setSelectedTrail(trail);
@@ -285,19 +311,46 @@ export default function Index() {
             <div className="flex-1 relative min-h-[300px]">
               <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} routeGeometry={routeGeometry} resizeTrigger={`mobile-${selectedTrail.id}-${isBottomSheetExpanded ? 'open' : 'closed'}`} />
             </div>
-            <div className={`absolute left-0 right-0 bottom-0 bg-card border-t border-border rounded-t-2xl shadow-2xl transition-all duration-300 z-20 ${isBottomSheetExpanded ? 'h-[75vh]' : 'h-[64px]'}`}>
+            <div className={`absolute left-0 right-0 bottom-0 bg-card border-t border-border rounded-t-2xl shadow-2xl transition-all duration-300 z-20 ${isBottomSheetExpanded ? 'h-[78vh]' : 'h-[170px]'}`}>
               <button
-                className="w-full flex flex-col items-center gap-1 py-2"
+                className="w-full flex flex-col items-center gap-1 pt-2 pb-1"
                 onClick={() => setIsBottomSheetExpanded(!isBottomSheetExpanded)}
                 aria-label={isBottomSheetExpanded ? 'Collapse details' : 'Expand details'}
               >
                 <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
-                {!isBottomSheetExpanded && (
-                  <span className="text-xs font-medium text-foreground/80 truncate px-4">Tap for trail details</span>
-                )}
+                <div className="flex items-center gap-1 text-xs font-medium text-foreground/80">
+                  <span>{isBottomSheetExpanded ? 'Hide details' : 'Show details'}</span>
+                  {isBottomSheetExpanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronUp className="h-3.5 w-3.5" />}
+                </div>
               </button>
+              {!isBottomSheetExpanded && (
+                <div className="px-4 pb-4 pt-2 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold leading-tight text-foreground truncate">{selectedTrail.name}</p>
+                      <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{selectedTrail.description}</p>
+                    </div>
+                    {selectedTrail.path.length > 1 && (
+                      <Badge variant="outline" className="shrink-0 capitalize">
+                        {selectedTrail.difficulty}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {mobileTrailStats.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <div key={item.key} className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-foreground">
+                          <Icon className="h-3.5 w-3.5 text-primary" />
+                          <span>{item.label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
               {isBottomSheetExpanded && (
-                <div className="overflow-y-auto px-4 pb-32" style={{ height: 'calc(100% - 32px)' }}>
+                <div className="overflow-y-auto px-4 pb-32" style={{ height: 'calc(100% - 38px)' }}>
                   <ElevationProfile trail={selectedTrail} />
                   <div className="mt-4">{sideContent}</div>
                 </div>
