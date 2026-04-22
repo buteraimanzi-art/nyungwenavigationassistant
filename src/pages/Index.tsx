@@ -274,15 +274,15 @@ export default function Index() {
             </main>
           </div>
 
-          {/* Mobile */}
-          <div className="md:hidden flex-1 flex flex-col relative overflow-hidden">
-            <div className="p-3 border-b border-border bg-card flex items-center justify-between gap-2 z-30 relative">
+          {/* Mobile — use fixed viewport height so the map container has a definite size */}
+          <div className="md:hidden flex flex-col relative overflow-hidden" style={{ height: 'calc(100dvh - 56px)' }}>
+            <div className="p-3 border-b border-border bg-card flex items-center justify-between gap-2 z-30 relative shrink-0">
               <Button variant="ghost" size="sm" onClick={handleBackToTrails} className="gap-1 -ml-2 shrink-0"><ArrowLeft className="w-4 h-4" /></Button>
               <div className="min-w-0 flex-1 flex justify-center"><CurrentTrailBadge trail={selectedTrail} /></div>
               {userLocation && <Badge variant="outline" className="gap-1 border-komoot-olive text-komoot-olive shrink-0 px-2"><div className="w-2 h-2 rounded-full bg-komoot-olive animate-pulse" />GPS</Badge>}
             </div>
             {/* Map fills the entire remaining viewport behind the bottom sheet */}
-            <div className="flex-1 relative">
+            <div className="flex-1 relative min-h-[300px]">
               <LeafletTrailMap trail={selectedTrail} userLocation={userLocation} onSelectAttraction={setSelectedAttraction} onSelectRestArea={setSelectedRestArea} showDirections={showDirections} chosenReception={chosenReception} navSteps={navSteps} routeGeometry={routeGeometry} />
             </div>
             <div className={`absolute left-0 right-0 bottom-0 bg-card border-t border-border rounded-t-2xl shadow-2xl transition-all duration-300 z-20 ${isBottomSheetExpanded ? 'h-[75vh]' : 'h-[64px]'}`}>
