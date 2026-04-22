@@ -275,7 +275,7 @@ export default function Index() {
           </div>
 
           {/* Mobile — use fixed viewport height so the map container has a definite size */}
-          <div className="md:hidden flex flex-col relative overflow-hidden" style={{ height: 'calc(100dvh - 56px)' }}>
+          <div className="md:hidden flex flex-col relative overflow-hidden" style={{ height: 'calc(100dvh - 64px)' }}>
             <div className="p-3 border-b border-border bg-card flex items-center justify-between gap-2 z-30 relative shrink-0">
               <Button variant="ghost" size="sm" onClick={handleBackToTrails} className="gap-1 -ml-2 shrink-0"><ArrowLeft className="w-4 h-4" /></Button>
               <div className="min-w-0 flex-1 flex justify-center"><CurrentTrailBadge trail={selectedTrail} /></div>
