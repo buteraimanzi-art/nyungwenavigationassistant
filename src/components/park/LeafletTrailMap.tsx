@@ -202,8 +202,8 @@ export function LeafletTrailMap({ trail, userLocation, showDirections, chosenRec
   }, [activeReception, navSteps, routeGeometry, roadPaths, trail, trailPaths, userLocation]);
 
   return (
-    <div className="relative h-full min-h-[400px] w-full overflow-hidden rounded-lg border border-border bg-muted">
-      <div ref={containerRef} className="h-full w-full" />
+    <div className="absolute inset-0 h-full w-full overflow-hidden bg-muted md:relative md:rounded-lg md:border md:border-border">
+      <div ref={containerRef} className="absolute inset-0 h-full w-full" />
       <MapLayerToggle currentLayer={mapLayer} onChange={setMapLayer} />
     </div>
   );
