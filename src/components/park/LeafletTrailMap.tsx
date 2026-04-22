@@ -29,6 +29,8 @@ interface LeafletTrailMapProps {
   routeGeometry?: { lat: number; lng: number }[] | null;
   onSelectAttraction?: (a: Attraction) => void;
   onSelectRestArea?: (r: RestArea) => void;
+  /** Change this value (e.g. trail.id, sheet-open boolean) to force the map to recompute its size. */
+  resizeTrigger?: string | number | boolean;
 }
 
 function createDivIcon(label: string, background: string, size = 32) {
