@@ -80,7 +80,25 @@ export function LeafletTrailMap({ trail, userLocation, showDirections, chosenRec
     tileLayerRef.current = L.tileLayer(tile.url, { attribution: tile.attr }).addTo(map);
     layerGroupRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
-    return () => { map.remove(); mapRef.current = null; layerGroupRef.current = null; tileLayerRef.current = null; };
+
+    // Force recalculation when the container size becomes available (mobile flex)
+    const invalidate = () => map.invalidateSize();
+    const t1 = setTimeout(invalidate, 100);
+    const t2 = setTimeout(invalidate, 400);
+    const t3 = setTimeout(invalidate, 1000);
+    const ro = new ResizeObserver(invalidate);
+    ro.observe(containerRef.current);
+    window.addEventListener('resize', invalidate);
+    window.addEventListener('orientationchange', invalidate);
+
+    return () => {
+      clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
+      ro.disconnect();
+      window.removeEventListener('resize', invalidate);
+      window.removeEventListener('orientationchange', invalidate);
+      map.remove();
+      mapRef.current = null; layerGroupRef.current = null; tileLayerRef.current = null;
+    };
   }, []);
 
   // Switch tile layer
