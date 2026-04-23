@@ -18,6 +18,7 @@ interface Props {
  */
 export function AudioGuide({ trail, userLocation }: Props) {
   const [enabled, setEnabled] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   const { isSpeaking, lastSpoken, supported, primed, stop, reset, prime, speak } = useAudioGuide(
     trail,
     userLocation,
@@ -28,19 +29,23 @@ export function AudioGuide({ trail, userLocation }: Props) {
   if (!supported || !trail) return null;
 
   const handleStart = () => {
-    // CRITICAL: prime synchronously inside the click handler so the
-    // browser allows future automatic speech.
-    prime(`Welcome to ${trail.name}. I will guide you along the trail.`);
-    setEnabled(true);
+    try {
+      prime(`Welcome to ${trail.name}. I will guide you along the trail.`);
+      setEnabled(true);
+      setMessage('Audio guide ready. Tap Test if you do not hear the welcome message.');
+    } catch {
+      setMessage('Audio guide could not start on this device yet. Please tap Test.');
+    }
   };
 
   const handleStop = () => {
     stop();
     setEnabled(false);
+    setMessage('Audio guide stopped.');
   };
 
   const handleTest = () => {
-    // Speak directly from a click to verify audio output
+    setMessage('Playing test audio…');
     speak(`Audio guide is working. You are on the ${trail.name} trail.`);
   };
 
@@ -79,6 +84,11 @@ export function AudioGuide({ trail, userLocation }: Props) {
       {lastSpoken && enabled && (
         <p className="text-[11px] text-muted-foreground line-clamp-3 border-l-2 border-primary/40 pl-2 mb-2">
           {lastSpoken}
+        </p>
+      )}
+      {message && (
+        <p className="mb-2 text-[11px] text-muted-foreground">
+          {message}
         </p>
       )}
       {enabled && (

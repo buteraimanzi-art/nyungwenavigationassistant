@@ -10,6 +10,19 @@ export interface Reception {
   phone?: string;
 }
 
+export const EMERGENCY_CONTACTS = [
+  {
+    label: 'NNP toll free',
+    number: '8006',
+    description: 'Primary Nyungwe emergency line.',
+  },
+  {
+    label: 'Reception desk',
+    number: '+250 788 317 027',
+    description: 'Main reception support number.',
+  },
+] as const;
+
 // The 3 official reception/gate points on the Nyungwe map
 // Gisakura is the PARK HEADQUARTERS (HQ)
 export const RECEPTIONS: Reception[] = [
@@ -18,21 +31,21 @@ export const RECEPTIONS: Reception[] = [
     name: 'Gisakura HQ (Park Headquarters)',
     coordinates: { lat: -2.478, lng: 29.105 },
     description: 'Main Park Headquarters & primary entrance. Check-in for western trails including Karamba, Ndambarare, and nearby routes.',
-    phone: '+250 788 000 001',
+    phone: '+250 788 317 027',
   },
   {
     id: 'reception-uwinka',
     name: 'Uwinka Reception',
     coordinates: { lat: -2.4625, lng: 29.198 },
     description: 'Central reception & ranger post. Check-in for most central trails including Igishigishigi, Buhoro, Umuyove, Imbaraga, Irebero, Umugote, Rukuzi, Uwinka, Bigugu, Kamiranzovu, and Kamiranzovu Waterfall.',
-    phone: '+250 788 000 002',
+    phone: '+250 788 317 027',
   },
   {
     id: 'reception-gisovu',
     name: 'Gisovu Reception',
     coordinates: { lat: -2.382, lng: 29.340 },
     description: 'Northeast entrance near Source of the Nile & Gisovu village. Check-in for Muzimu, Cyinzobe, Congo–Nile, and eastern trails.',
-    phone: '+250 788 000 003',
+    phone: '+250 788 317 027',
   },
 ];
 
