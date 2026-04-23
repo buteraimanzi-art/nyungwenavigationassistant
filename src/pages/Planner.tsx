@@ -15,13 +15,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Info, MapPin, Phone, Route, ShieldAlert, X } from 'lucide-react';
+import { Info, Lock, MapPin, Phone, Route, ShieldAlert, X } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
 
 const DEFAULT_TRAIL = trails.find((trail) => trail.id === 'trail-ndambarare') ?? trails[0];
 
 type MobilePanel = 'route' | 'details' | 'safety';
 
 export default function Planner() {
+  const { isAdmin } = useAuth();
   const [selectedTrail, setSelectedTrail] = useState<Trail | null>(DEFAULT_TRAIL);
   const [showDirections, setShowDirections] = useState(false);
   const [chosenReception, setChosenReception] = useState<Reception | null>(null);
@@ -172,12 +174,13 @@ export default function Planner() {
 
           <div className="mt-3 grid grid-cols-3 gap-2">
             {[
-              { id: 'route', label: 'Route', icon: Route },
-              { id: 'details', label: 'Details', icon: Info },
-              { id: 'safety', label: 'Safety', icon: ShieldAlert },
+              { id: 'route', label: 'Route', icon: Route, adminOnly: false },
+              { id: 'details', label: 'Details', icon: Info, adminOnly: false },
+              { id: 'safety', label: 'Safety', icon: ShieldAlert, adminOnly: true },
             ].map((panel) => {
               const Icon = panel.icon;
               const active = mobilePanel === panel.id;
+              const locked = panel.adminOnly && !isAdmin;
               return (
                 <Button
                   key={panel.id}
@@ -185,8 +188,9 @@ export default function Planner() {
                   variant={active ? 'default' : 'outline'}
                   className="h-10 rounded-xl gap-2"
                   onClick={() => setMobilePanel(panel.id as MobilePanel)}
+                  title={locked ? 'Admin access required' : undefined}
                 >
-                  <Icon className="h-4 w-4" />
+                  {locked ? <Lock className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
                   <span>{panel.label}</span>
                 </Button>
               );
@@ -248,7 +252,20 @@ export default function Planner() {
               </div>
             )}
 
-            {mobilePanel === 'safety' && (
+            {mobilePanel === 'safety' && !isAdmin && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Lock className="h-4 w-4 text-primary" /> Admin only
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm text-muted-foreground">
+                  Safety tools and emergency contact management are restricted to park admins. Ask a park administrator to grant your account the admin role.
+                </CardContent>
+              </Card>
+            )}
+
+            {mobilePanel === 'safety' && isAdmin && (
               <div className="space-y-4">
                 <Card>
                   <CardHeader className="pb-3">
