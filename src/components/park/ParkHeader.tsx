@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Menu, User, Map, X, Smartphone } from 'lucide-react';
+import { Menu, User, Map, X, Smartphone, LogOut, ShieldCheck } from 'lucide-react';
 import nyungweLogo from '@/assets/nyungwe-logo.webp';
+import { useAuth } from '@/hooks/use-auth';
 
 const navLinks = [
   { to: '/', label: 'Routes' },
@@ -19,6 +20,8 @@ export function ParkHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, isAdmin, signOut } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -96,13 +99,34 @@ export function ParkHeader() {
                   className="rounded-full gradient-primary text-primary-foreground hover:shadow-glow px-4 font-medium border-0 transition-smooth"
                 >
                   <User className="w-4 h-4 mr-1.5" />
-                  <span className="hidden sm:inline">Sign in</span>
+                  <span className="hidden sm:inline">{user ? 'Account' : 'Sign in'}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52 mt-2 shadow-floaty">
-                <DropdownMenuItem><Map className="w-4 h-4 mr-2" />My Trails</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Settings</DropdownMenuItem>
+                {user ? (
+                  <>
+                    <DropdownMenuItem disabled className="opacity-100 text-xs text-muted-foreground">
+                      {user.email}
+                    </DropdownMenuItem>
+                    {isAdmin && (
+                      <DropdownMenuItem disabled className="opacity-100 text-xs text-primary">
+                        <ShieldCheck className="w-3.5 h-3.5 mr-2" /> Admin
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/planner')}>
+                      <Map className="w-4 h-4 mr-2" />My Trails
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => signOut().then(() => navigate('/auth'))}>
+                      <LogOut className="w-4 h-4 mr-2" />Sign out
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <DropdownMenuItem onClick={() => navigate('/auth')}>
+                    <User className="w-4 h-4 mr-2" />Sign in / Sign up
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 
