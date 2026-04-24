@@ -11,6 +11,7 @@ import type { Database } from '@/integrations/supabase/types';
 import { AlertTriangle, CheckCircle2, Clock, Loader2, MapPin, Phone, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
+import { AlertsMap } from '@/components/park/AlertsMap';
 
 type Alert = Database['public']['Tables']['emergency_alerts']['Row'];
 type Status = Database['public']['Enums']['alert_status'];
@@ -166,14 +167,35 @@ export default function AdminAlerts() {
           <div className="flex justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
-        ) : visible.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center text-sm text-muted-foreground">
-              <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-primary" />
-              No {filter === 'active' ? 'active' : ''} emergency alerts right now.
-            </CardContent>
-          </Card>
         ) : (
+          <>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <MapPin className="h-4 w-4 text-primary" /> Live alert map
+                  <span className="ml-auto text-xs font-normal text-muted-foreground">
+                    {visible.filter((a) => a.latitude != null && a.longitude != null).length} of {visible.length} located
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AlertsMap alerts={visible} />
+                <div className="flex flex-wrap gap-3 mt-3 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#dc2626]" />New</span>
+                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#f59e0b]" />Acknowledged</span>
+                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#16a34a]" />Resolved</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {visible.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center text-sm text-muted-foreground">
+                  <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-primary" />
+                  No {filter === 'active' ? 'active' : ''} emergency alerts right now.
+                </CardContent>
+              </Card>
+            ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {visible.map((a) => (
               <Card key={a.id} className={a.status === 'new' ? 'border-destructive/60 shadow-md' : ''}>
@@ -232,6 +254,8 @@ export default function AdminAlerts() {
               </Card>
             ))}
           </div>
+            )}
+          </>
         )}
       </div>
     </div>
