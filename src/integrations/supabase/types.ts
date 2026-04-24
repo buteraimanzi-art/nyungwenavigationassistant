@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      emergency_alerts: {
+        Row: {
+          accuracy: number | null
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          created_at: string
+          description: string | null
+          id: string
+          issue_type: Database["public"]["Enums"]["alert_issue_type"]
+          latitude: number | null
+          longitude: number | null
+          reporter_name: string | null
+          reporter_phone: string | null
+          resolved_at: string | null
+          status: Database["public"]["Enums"]["alert_status"]
+          trail_id: string | null
+          trail_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accuracy?: number | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          issue_type?: Database["public"]["Enums"]["alert_issue_type"]
+          latitude?: number | null
+          longitude?: number | null
+          reporter_name?: string | null
+          reporter_phone?: string | null
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["alert_status"]
+          trail_id?: string | null
+          trail_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accuracy?: number | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          issue_type?: Database["public"]["Enums"]["alert_issue_type"]
+          latitude?: number | null
+          longitude?: number | null
+          reporter_name?: string | null
+          reporter_phone?: string | null
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["alert_status"]
+          trail_id?: string | null
+          trail_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -73,6 +133,14 @@ export type Database = {
       }
     }
     Enums: {
+      alert_issue_type:
+        | "injury"
+        | "lost"
+        | "wildlife"
+        | "weather"
+        | "medical"
+        | "other"
+      alert_status: "new" | "acknowledged" | "resolved"
       app_role: "admin" | "user"
     }
     CompositeTypes: {
@@ -201,6 +269,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      alert_issue_type: [
+        "injury",
+        "lost",
+        "wildlife",
+        "weather",
+        "medical",
+        "other",
+      ],
+      alert_status: ["new", "acknowledged", "resolved"],
       app_role: ["admin", "user"],
     },
   },

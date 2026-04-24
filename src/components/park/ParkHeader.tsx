@@ -117,6 +117,11 @@ export function ParkHeader() {
                     <DropdownMenuItem onClick={() => navigate('/planner')}>
                       <Map className="w-4 h-4 mr-2" />My Trails
                     </DropdownMenuItem>
+                    {isAdmin && (
+                      <DropdownMenuItem onClick={() => navigate('/admin/alerts')}>
+                        <ShieldCheck className="w-4 h-4 mr-2" />Emergency portal
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => signOut().then(() => navigate('/auth'))}>
                       <LogOut className="w-4 h-4 mr-2" />Sign out

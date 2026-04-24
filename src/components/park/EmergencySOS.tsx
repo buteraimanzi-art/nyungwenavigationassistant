@@ -7,6 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, MapPin, Heart, CloudRain, Compass, Bug, HelpCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/use-auth';
+import { toast } from 'sonner';
 
 const issueTypes: Array<{ value: EmergencyAlert['issueType']; label: string; icon: React.ReactNode }> = [
   { value: 'injury', label: 'Injury', icon: <Heart className="w-5 h-5" /> },
@@ -20,6 +23,7 @@ const issueTypes: Array<{ value: EmergencyAlert['issueType']; label: string; ico
 interface Props { userLocation: UserLocation | null; trailId: string; trailName: string; }
 
 export function EmergencySOS({ userLocation, trailId, trailName }: Props) {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
   const [holdProgress, setHoldProgress] = useState(0);
@@ -39,10 +43,27 @@ export function EmergencySOS({ userLocation, trailId, trailName }: Props) {
   }, [isHolding, holdProgress]);
 
   const handleSubmit = async () => {
-    if (!userLocation) return;
+    if (!user) {
+      toast.error('Please sign in before sending an emergency alert.');
+      return;
+    }
     setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    const { error } = await supabase.from('emergency_alerts').insert({
+      user_id: user.id,
+      reporter_name: (user.user_metadata?.full_name as string) ?? null,
+      trail_id: trailId || null,
+      trail_name: trailName || null,
+      issue_type: issueType,
+      description: description || null,
+      latitude: userLocation?.lat ?? null,
+      longitude: userLocation?.lng ?? null,
+      accuracy: userLocation?.accuracy ?? null,
+    });
     setIsSubmitting(false);
+    if (error) {
+      toast.error(error.message || 'Could not send alert. Please try again.');
+      return;
+    }
     setIsSubmitted(true);
     setTimeout(() => { setIsOpen(false); setIsSubmitted(false); setIssueType('other'); setDescription(''); }, 3000);
   };
@@ -83,8 +104,10 @@ export function EmergencySOS({ userLocation, trailId, trailName }: Props) {
                   <div><DialogTitle>Emergency Alert</DialogTitle><DialogDescription>Help us understand your situation</DialogDescription></div>
                 </div>
               </DialogHeader>
-              {userLocation && (
+              {userLocation ? (
                 <Alert className="bg-muted"><MapPin className="h-4 w-4" /><AlertDescription className="text-xs">Location: {userLocation.lat.toFixed(6)}, {userLocation.lng.toFixed(6)} • Accuracy: {Math.round(userLocation.accuracy)}m</AlertDescription></Alert>
+              ) : (
+                <Alert className="bg-muted"><MapPin className="h-4 w-4" /><AlertDescription className="text-xs">Location not available — rangers will be notified without precise coordinates.</AlertDescription></Alert>
               )}
               <div className="space-y-4">
                 <div className="space-y-3">
