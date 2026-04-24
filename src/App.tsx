@@ -12,6 +12,8 @@ import Features from "./pages/Features.tsx";
 import Updates from "./pages/Updates.tsx";
 import AuthPage from "./pages/Auth.tsx";
 import AdminAlerts from "./pages/AdminAlerts.tsx";
+import AdminCodes from "./pages/AdminCodes.tsx";
+import AdminHikers from "./pages/AdminHikers.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -31,6 +33,8 @@ const App = () => (
               <Route path="/features" element={<RequireAuth><Features /></RequireAuth>} />
               <Route path="/updates" element={<RequireAuth><Updates /></RequireAuth>} />
               <Route path="/admin/alerts" element={<RequireAuth><AdminAlerts /></RequireAuth>} />
+              <Route path="/admin/codes" element={<RequireAuth><AdminCodes /></RequireAuth>} />
+              <Route path="/admin/hikers" element={<RequireAuth><AdminHikers /></RequireAuth>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -12,9 +12,11 @@ import { EmergencySOS } from '@/components/park/EmergencySOS';
 import { GettingThereMap } from '@/components/park/GettingThereMap';
 import { ReliveCommunityFeed } from '@/components/park/ReliveCommunityFeed';
 import { ReliveUploadButton } from '@/components/park/ReliveUploadButton';
+import { TrailAccessGate } from '@/components/park/TrailAccessGate';
 import { trails, calculateTrailProgress } from '@/lib/trail-data';
 import { useDemoLocation } from '@/hooks/use-location';
 import { useRealRoute } from '@/hooks/use-real-route';
+import { useLocationBroadcast } from '@/hooks/use-location-broadcast';
 import type { Trail, Attraction, RestArea } from '@/lib/types';
 import type { Reception } from '@/lib/receptions';
 import { Button } from '@/components/ui/button';
@@ -26,6 +28,7 @@ import nyungweLogo from '@/assets/nyungwe-logo.webp';
 
 export default function Index() {
   const [selectedTrail, setSelectedTrail] = useState<Trail | null>(null);
+  const [pendingTrail, setPendingTrail] = useState<Trail | null>(null);
   const [showTrailSelector, setShowTrailSelector] = useState(true);
   const [selectedAttraction, setSelectedAttraction] = useState<Attraction | null>(null);
   const [selectedRestArea, setSelectedRestArea] = useState<RestArea | null>(null);
@@ -35,6 +38,7 @@ export default function Index() {
   const [isNavigating, setIsNavigating] = useState(false);
 
   const { location: userLocation, followRoute } = useDemoLocation();
+  useLocationBroadcast(userLocation, selectedTrail);
 
   const { route: realRoute, loading: routeLoading } = useRealRoute(
     isNavigating,
@@ -76,11 +80,17 @@ export default function Index() {
   }, [selectedTrail]);
 
   const handleSelectTrail = (trail: Trail) => {
+    // Gate trail access by code; promotion happens in the gate's onUnlocked.
+    setPendingTrail(trail);
+  };
+
+  const promoteTrail = (trail: Trail) => {
     setSelectedTrail(trail);
     setShowTrailSelector(false);
     setShowDirections(false);
     setChosenReception(null);
     setIsNavigating(false);
+    setPendingTrail(null);
   };
 
   const handleBackToTrails = () => {
@@ -362,6 +372,12 @@ export default function Index() {
           </div>
         </>
       ) : null}
+
+      <TrailAccessGate
+        trail={pendingTrail}
+        onUnlocked={() => pendingTrail && promoteTrail(pendingTrail)}
+        onCancel={() => setPendingTrail(null)}
+      />
     </div>
   );
 }
