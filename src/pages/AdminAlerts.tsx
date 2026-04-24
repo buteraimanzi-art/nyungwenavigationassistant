@@ -11,6 +11,7 @@ import type { Database } from '@/integrations/supabase/types';
 import { AlertTriangle, CheckCircle2, Clock, Loader2, MapPin, Phone, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
+import { AlertsMap } from '@/components/park/AlertsMap';
 
 type Alert = Database['public']['Tables']['emergency_alerts']['Row'];
 type Status = Database['public']['Enums']['alert_status'];
