@@ -372,6 +372,12 @@ export default function Index() {
           </div>
         </>
       ) : null}
+
+      <TrailAccessGate
+        trail={pendingTrail}
+        onUnlocked={() => pendingTrail && promoteTrail(pendingTrail)}
+        onCancel={() => setPendingTrail(null)}
+      />
     </div>
   );
 }
