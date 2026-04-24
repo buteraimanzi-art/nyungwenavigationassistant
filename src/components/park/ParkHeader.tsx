@@ -5,7 +5,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Menu, User, Map, X, Smartphone, LogOut, ShieldCheck } from 'lucide-react';
+import { Menu, User, Map, X, Smartphone, LogOut, ShieldCheck, KeyRound, Radio } from 'lucide-react';
 import nyungweLogo from '@/assets/nyungwe-logo.webp';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -118,9 +118,17 @@ export function ParkHeader() {
                       <Map className="w-4 h-4 mr-2" />My Trails
                     </DropdownMenuItem>
                     {isAdmin && (
-                      <DropdownMenuItem onClick={() => navigate('/admin/alerts')}>
-                        <ShieldCheck className="w-4 h-4 mr-2" />Emergency portal
-                      </DropdownMenuItem>
+                      <>
+                        <DropdownMenuItem onClick={() => navigate('/admin/alerts')}>
+                          <ShieldCheck className="w-4 h-4 mr-2" />Emergency portal
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/admin/codes')}>
+                          <KeyRound className="w-4 h-4 mr-2" />Trail access codes
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/admin/hikers')}>
+                          <Radio className="w-4 h-4 mr-2" />Live hikers
+                        </DropdownMenuItem>
+                      </>
                     )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => signOut().then(() => navigate('/auth'))}>
