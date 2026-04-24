@@ -254,6 +254,8 @@ export default function AdminAlerts() {
               </Card>
             ))}
           </div>
+            )}
+          </>
         )}
       </div>
     </div>
