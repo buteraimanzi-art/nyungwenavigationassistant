@@ -98,6 +98,113 @@ export type Database = {
         }
         Relationships: []
       }
+      trail_access_codes: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          created_by: string
+          id: string
+          note: string | null
+          trail_id: string
+          trail_name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          created_by: string
+          id?: string
+          note?: string | null
+          trail_id: string
+          trail_name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          note?: string | null
+          trail_id?: string
+          trail_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      trail_redemptions: {
+        Row: {
+          code_id: string
+          id: string
+          redeemed_at: string
+          trail_id: string
+          trail_name: string
+          user_id: string
+        }
+        Insert: {
+          code_id: string
+          id?: string
+          redeemed_at?: string
+          trail_id: string
+          trail_name: string
+          user_id: string
+        }
+        Update: {
+          code_id?: string
+          id?: string
+          redeemed_at?: string
+          trail_id?: string
+          trail_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trail_redemptions_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "trail_access_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_locations: {
+        Row: {
+          accuracy: number | null
+          heading: number | null
+          latitude: number
+          longitude: number
+          speed: number | null
+          trail_id: string | null
+          trail_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accuracy?: number | null
+          heading?: number | null
+          latitude: number
+          longitude: number
+          speed?: number | null
+          trail_id?: string | null
+          trail_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accuracy?: number | null
+          heading?: number | null
+          latitude?: number
+          longitude?: number
+          speed?: number | null
+          trail_id?: string | null
+          trail_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
