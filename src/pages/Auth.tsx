@@ -142,7 +142,7 @@ export default function AuthPage() {
                   Create account
                 </Button>
                 <p className="text-xs text-muted-foreground">
-                  By creating an account you accept that you'll only access Safety controls if you've been granted admin rights.
+                  Anyone can sign up to plan trails and send emergency alerts. Park admins receive and manage those alerts from their portal.
                 </p>
               </form>
             </TabsContent>
