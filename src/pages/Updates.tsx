@@ -1,4 +1,5 @@
 import { ParkHeader } from '@/components/park/ParkHeader';
+import { BackButton } from '@/components/BackButton';
 import { EmergencySOS } from '@/components/park/EmergencySOS';
 import { useDemoLocation } from '@/hooks/use-location';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,6 +27,7 @@ export default function Updates() {
           <p className="text-komoot-header-foreground/70 max-w-xl mx-auto">Latest news, trail conditions, and app improvements</p>
         </div>
         <div className="container max-w-3xl mx-auto px-4 py-12 space-y-4">
+          <BackButton to="/" label="Back to routes" className="mb-2" />
           {updates.map((u, i) => (
             <Card key={i} className="rounded-xl hover:shadow-md transition-shadow">
               <CardHeader className="pb-2">

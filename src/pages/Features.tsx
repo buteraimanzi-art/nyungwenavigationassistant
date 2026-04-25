@@ -1,4 +1,5 @@
 import { ParkHeader } from '@/components/park/ParkHeader';
+import { BackButton } from '@/components/BackButton';
 import { EmergencySOS } from '@/components/park/EmergencySOS';
 import { useDemoLocation } from '@/hooks/use-location';
 import { Card, CardContent } from '@/components/ui/card';
@@ -28,6 +29,7 @@ export default function Features() {
           <p className="text-komoot-header-foreground/70 max-w-xl mx-auto">Everything you need for a safe, guided adventure through Nyungwe National Park</p>
         </div>
         <div className="container max-w-5xl mx-auto px-4 py-12">
+          <BackButton to="/" label="Back to routes" className="mb-4" />
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {features.map((f, i) => (
               <Card key={i} className="rounded-xl hover:shadow-lg transition-shadow border-komoot-olive/10 hover:border-komoot-olive/30">

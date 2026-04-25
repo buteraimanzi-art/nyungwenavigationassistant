@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { ParkHeader } from '@/components/park/ParkHeader';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -135,8 +136,7 @@ export default function AdminAlerts() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <ParkHeader />
+    <AdminLayout>
       <div className="container px-4 py-6 md:py-10 space-y-6">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
@@ -258,6 +258,6 @@ export default function AdminAlerts() {
           </>
         )}
       </div>
-    </div>
+    </AdminLayout>
   );
 }
