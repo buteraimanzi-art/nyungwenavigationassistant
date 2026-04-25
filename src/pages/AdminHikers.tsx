@@ -184,6 +184,6 @@ export default function AdminHikers() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </AdminLayout>
   );
 }
