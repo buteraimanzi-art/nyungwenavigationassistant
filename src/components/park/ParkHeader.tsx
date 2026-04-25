@@ -130,6 +130,9 @@ export function ParkHeader() {
                     </DropdownMenuItem>
                     {isAdmin && (
                       <>
+                        <DropdownMenuItem onClick={() => navigate('/admin')}>
+                          <LayoutDashboard className="w-4 h-4 mr-2" />Admin dashboard
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate('/admin/alerts')}>
                           <ShieldCheck className="w-4 h-4 mr-2" />Emergency portal
                         </DropdownMenuItem>
