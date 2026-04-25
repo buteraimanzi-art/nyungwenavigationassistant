@@ -104,9 +104,8 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <ParkHeader />
-      <main className="flex-1 container px-4 md:px-8 py-8 space-y-8">
+    <AdminLayout>
+      <div className="container px-4 md:px-8 py-8 space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
