@@ -350,6 +350,6 @@ export default function AdminCodes() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </AdminLayout>
   );
 }
