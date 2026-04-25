@@ -122,8 +122,7 @@ export default function AdminHikers() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <ParkHeader />
+    <AdminLayout>
       <div className="container px-4 py-6 md:py-10 space-y-6">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
