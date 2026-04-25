@@ -131,7 +131,7 @@ function buildMoments(path: Coordinates[], totalDist: number, photoSeed: number)
           width: 1080,
           height: 1080,
           // Use the local Nyungwe logo as the demo image — no external/generated images.
-          url: nyungweLogo,
+          url: NYUNGWE_LOGO_URL,
         },
       ],
     });
