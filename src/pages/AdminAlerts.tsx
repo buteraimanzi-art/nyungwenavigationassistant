@@ -258,6 +258,6 @@ export default function AdminAlerts() {
           </>
         )}
       </div>
-    </div>
+    </AdminLayout>
   );
 }
