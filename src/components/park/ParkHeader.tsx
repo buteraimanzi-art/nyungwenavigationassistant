@@ -5,7 +5,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Menu, User, Map, X, Smartphone, LogOut, ShieldCheck, KeyRound, Radio } from 'lucide-react';
+import { Menu, User, Map, X, Smartphone, LogOut, ShieldCheck, KeyRound, Radio, LayoutDashboard } from 'lucide-react';
 import nyungweLogo from '@/assets/nyungwe-logo.webp';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -83,6 +83,17 @@ export function ParkHeader() {
           <div className="hidden md:block h-6 w-px bg-border/70" />
 
           <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/admin')}
+                className="hidden sm:flex gap-1.5 rounded-full border-primary/40 text-primary bg-primary/5 hover:bg-primary hover:text-primary-foreground hover:border-primary px-4 font-medium transition-smooth"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Admin
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
@@ -119,6 +130,9 @@ export function ParkHeader() {
                     </DropdownMenuItem>
                     {isAdmin && (
                       <>
+                        <DropdownMenuItem onClick={() => navigate('/admin')}>
+                          <LayoutDashboard className="w-4 h-4 mr-2" />Admin dashboard
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate('/admin/alerts')}>
                           <ShieldCheck className="w-4 h-4 mr-2" />Emergency portal
                         </DropdownMenuItem>

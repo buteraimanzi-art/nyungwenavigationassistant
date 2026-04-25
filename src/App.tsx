@@ -11,6 +11,7 @@ import Planner from "./pages/Planner.tsx";
 import Features from "./pages/Features.tsx";
 import Updates from "./pages/Updates.tsx";
 import AuthPage from "./pages/Auth.tsx";
+import AdminDashboard from "./pages/AdminDashboard.tsx";
 import AdminAlerts from "./pages/AdminAlerts.tsx";
 import AdminCodes from "./pages/AdminCodes.tsx";
 import AdminHikers from "./pages/AdminHikers.tsx";
@@ -32,6 +33,7 @@ const App = () => (
               <Route path="/planner" element={<RequireAuth><Planner /></RequireAuth>} />
               <Route path="/features" element={<RequireAuth><Features /></RequireAuth>} />
               <Route path="/updates" element={<RequireAuth><Updates /></RequireAuth>} />
+              <Route path="/admin" element={<RequireAuth><AdminDashboard /></RequireAuth>} />
               <Route path="/admin/alerts" element={<RequireAuth><AdminAlerts /></RequireAuth>} />
               <Route path="/admin/codes" element={<RequireAuth><AdminCodes /></RequireAuth>} />
               <Route path="/admin/hikers" element={<RequireAuth><AdminHikers /></RequireAuth>} />
