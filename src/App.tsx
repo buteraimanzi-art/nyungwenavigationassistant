@@ -11,6 +11,7 @@ import Planner from "./pages/Planner.tsx";
 import Features from "./pages/Features.tsx";
 import Updates from "./pages/Updates.tsx";
 import AuthPage from "./pages/Auth.tsx";
+import AdminDashboard from "./pages/AdminDashboard.tsx";
 import AdminAlerts from "./pages/AdminAlerts.tsx";
 import AdminCodes from "./pages/AdminCodes.tsx";
 import AdminHikers from "./pages/AdminHikers.tsx";
