@@ -1,4 +1,5 @@
 import { ParkHeader } from '@/components/park/ParkHeader';
+import { BackButton } from '@/components/BackButton';
 import { EmergencySOS } from '@/components/park/EmergencySOS';
 import { useDemoLocation } from '@/hooks/use-location';
 import { Card, CardContent } from '@/components/ui/card';
