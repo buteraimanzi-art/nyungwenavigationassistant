@@ -12,7 +12,9 @@
 
 import type { Coordinates } from './types';
 import { trails } from './trail-data';
-import nyungweLogo from '@/assets/nyungwe-logo.webp';
+
+// Local Nyungwe logo served from /public — no external/generated images.
+const NYUNGWE_LOGO_URL = '/nyungwe-logo.webp';
 
 // ─── Schema (matches swagger components.schemas) ────────────────────────────
 
@@ -129,7 +131,7 @@ function buildMoments(path: Coordinates[], totalDist: number, photoSeed: number)
           width: 1080,
           height: 1080,
           // Use the local Nyungwe logo as the demo image — no external/generated images.
-          url: nyungweLogo,
+          url: NYUNGWE_LOGO_URL,
         },
       ],
     });
