@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Navigate, Link } from 'react-router-dom';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 import { ParkHeader } from '@/components/park/ParkHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
