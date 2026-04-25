@@ -12,6 +12,7 @@
 
 import type { Coordinates } from './types';
 import { trails } from './trail-data';
+import nyungweLogo from '@/assets/nyungwe-logo.webp';
 
 // ─── Schema (matches swagger components.schemas) ────────────────────────────
 
@@ -127,8 +128,8 @@ function buildMoments(path: Coordinates[], totalDist: number, photoSeed: number)
           type: 'image',
           width: 1080,
           height: 1080,
-          // Picsum is a public, no-auth photo placeholder service — perfect for demo.
-          url: `https://picsum.photos/seed/nyungwe-${photoSeed}-${i}/640/640`,
+          // Use the local Nyungwe logo as the demo image — no external/generated images.
+          url: nyungweLogo,
         },
       ],
     });
