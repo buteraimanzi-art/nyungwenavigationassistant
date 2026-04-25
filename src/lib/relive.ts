@@ -12,6 +12,7 @@
 
 import type { Coordinates } from './types';
 import { trails } from './trail-data';
+import nyungweLogo from '@/assets/nyungwe-logo.webp';
 
 // ─── Schema (matches swagger components.schemas) ────────────────────────────
 
