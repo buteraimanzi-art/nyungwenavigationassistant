@@ -33,6 +33,7 @@ const App = () => (
               <Route path="/planner" element={<RequireAuth><Planner /></RequireAuth>} />
               <Route path="/features" element={<RequireAuth><Features /></RequireAuth>} />
               <Route path="/updates" element={<RequireAuth><Updates /></RequireAuth>} />
+              <Route path="/admin" element={<RequireAuth><AdminDashboard /></RequireAuth>} />
               <Route path="/admin/alerts" element={<RequireAuth><AdminAlerts /></RequireAuth>} />
               <Route path="/admin/codes" element={<RequireAuth><AdminCodes /></RequireAuth>} />
               <Route path="/admin/hikers" element={<RequireAuth><AdminHikers /></RequireAuth>} />
