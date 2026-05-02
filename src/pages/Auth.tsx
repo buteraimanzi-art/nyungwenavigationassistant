@@ -27,6 +27,8 @@ export default function AuthPage() {
   const { user, loading } = useAuth();
   const [tab, setTab] = useState<'signin' | 'signup'>('signin');
   const [submitting, setSubmitting] = useState(false);
+  const [signInError, setSignInError] = useState<{ title: string; detail: string; suggestion?: string } | null>(null);
+  const [lastEmail, setLastEmail] = useState('');
 
   useEffect(() => {
     if (!loading && user) navigate('/', { replace: true });
