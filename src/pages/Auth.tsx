@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import nyungweLogo from '@/assets/nyungwe-logo.webp';
 
 const signInSchema = z.object({
@@ -26,6 +27,8 @@ export default function AuthPage() {
   const { user, loading } = useAuth();
   const [tab, setTab] = useState<'signin' | 'signup'>('signin');
   const [submitting, setSubmitting] = useState(false);
+  const [signInError, setSignInError] = useState<{ title: string; detail: string; suggestion?: string } | null>(null);
+  const [lastEmail, setLastEmail] = useState('');
 
   useEffect(() => {
     if (!loading && user) navigate('/', { replace: true });
@@ -33,15 +36,19 @@ export default function AuthPage() {
 
   const handleSignIn = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setSignInError(null);
     const formData = new FormData(event.currentTarget);
     const parsed = signInSchema.safeParse({
       email: formData.get('email'),
       password: formData.get('password'),
     });
     if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? 'Check your details');
+      const m = parsed.error.issues[0]?.message ?? 'Check your details';
+      setSignInError({ title: 'Check your details', detail: m });
+      toast.error(m);
       return;
     }
+    setLastEmail(parsed.data.email);
     setSubmitting(true);
     const { error } = await supabase.auth.signInWithPassword({
       email: parsed.data.email,
@@ -49,7 +56,42 @@ export default function AuthPage() {
     });
     setSubmitting(false);
     if (error) {
-      toast.error(error.message);
+      const msg = error.message?.toLowerCase() ?? '';
+      if (msg.includes('invalid login credentials') || msg.includes('invalid_credentials')) {
+        const email = parsed.data.email.toLowerCase();
+        const typoMap: Record<string, string> = {
+          'gamil.com': 'gmail.com',
+          'gmial.com': 'gmail.com',
+          'gmai.com': 'gmail.com',
+          'gnail.com': 'gmail.com',
+          'gmal.com': 'gmail.com',
+          'gmaill.com': 'gmail.com',
+          'gmailcom': 'gmail.com',
+          'hotnail.com': 'hotmail.com',
+          'hotmial.com': 'hotmail.com',
+          'yaho.com': 'yahoo.com',
+          'yahooo.com': 'yahoo.com',
+          'outlok.com': 'outlook.com',
+        };
+        const [local, domain] = email.split('@');
+        const suggestion = domain && typoMap[domain] ? `${local}@${typoMap[domain]}` : undefined;
+        setSignInError({
+          title: "Email or password doesn't match",
+          detail: suggestion
+            ? `We couldn't find an account for "${email}". It looks like a typo.`
+            : `We couldn't find an account matching "${email}", or the password is wrong. Check the spelling of your email and your password (it's case-sensitive).`,
+          suggestion,
+        });
+        toast.error("Email or password doesn't match", { duration: 6000 });
+      } else if (msg.includes('email not confirmed')) {
+        setSignInError({
+          title: 'Email not confirmed',
+          detail: 'Please open the confirmation link we sent to your inbox before signing in.',
+        });
+      } else {
+        setSignInError({ title: 'Sign-in failed', detail: error.message });
+        toast.error(error.message, { duration: 6000 });
+      }
       return;
     }
     toast.success('Welcome back!');
@@ -108,9 +150,39 @@ export default function AuthPage() {
 
             <TabsContent value="signin" className="mt-4">
               <form className="space-y-4" onSubmit={handleSignIn}>
+                {signInError && (
+                  <Alert variant="destructive" className="border-destructive/50">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>{signInError.title}</AlertTitle>
+                    <AlertDescription className="space-y-2">
+                      <p>{signInError.detail}</p>
+                      {signInError.suggestion && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const input = document.getElementById('signin-email') as HTMLInputElement | null;
+                            if (input) input.value = signInError.suggestion!;
+                            setSignInError(null);
+                          }}
+                          className="font-medium underline underline-offset-2 hover:opacity-80"
+                        >
+                          Did you mean {signInError.suggestion}? Use this email
+                        </button>
+                      )}
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">Email</Label>
-                  <Input id="signin-email" name="email" type="email" autoComplete="email" required />
+                  <Input
+                    id="signin-email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    defaultValue={lastEmail}
+                    onChange={() => signInError && setSignInError(null)}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-password">Password</Label>
