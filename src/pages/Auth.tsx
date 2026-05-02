@@ -150,9 +150,39 @@ export default function AuthPage() {
 
             <TabsContent value="signin" className="mt-4">
               <form className="space-y-4" onSubmit={handleSignIn}>
+                {signInError && (
+                  <Alert variant="destructive" className="border-destructive/50">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>{signInError.title}</AlertTitle>
+                    <AlertDescription className="space-y-2">
+                      <p>{signInError.detail}</p>
+                      {signInError.suggestion && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const input = document.getElementById('signin-email') as HTMLInputElement | null;
+                            if (input) input.value = signInError.suggestion!;
+                            setSignInError(null);
+                          }}
+                          className="font-medium underline underline-offset-2 hover:opacity-80"
+                        >
+                          Did you mean {signInError.suggestion}? Use this email
+                        </button>
+                      )}
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">Email</Label>
-                  <Input id="signin-email" name="email" type="email" autoComplete="email" required />
+                  <Input
+                    id="signin-email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    defaultValue={lastEmail}
+                    onChange={() => signInError && setSignInError(null)}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-password">Password</Label>
