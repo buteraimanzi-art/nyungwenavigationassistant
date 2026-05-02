@@ -5,9 +5,10 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Menu, User, Map, X, Smartphone, LogOut, ShieldCheck, KeyRound, Radio, LayoutDashboard } from 'lucide-react';
+import { Menu, User, Map, X, Smartphone, LogOut, ShieldCheck, KeyRound, Radio, LayoutDashboard, HelpCircle } from 'lucide-react';
 import nyungweLogo from '@/assets/nyungwe-logo.webp';
 import { useAuth } from '@/hooks/use-auth';
+import { openOnboardingTour } from '@/components/OnboardingTour';
 
 const navLinks = [
   { to: '/', label: 'Routes' },
