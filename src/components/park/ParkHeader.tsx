@@ -146,6 +146,10 @@ export function ParkHeader() {
                       </>
                     )}
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => openOnboardingTour()}>
+                      <HelpCircle className="w-4 h-4 mr-2" />Replay tutorial
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => signOut().then(() => navigate('/auth'))}>
                       <LogOut className="w-4 h-4 mr-2" />Sign out
                     </DropdownMenuItem>
