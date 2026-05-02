@@ -71,10 +71,11 @@ function sampleLoopPositions(seed: OfficialTrailSeed, count: number, phase: numb
     const angle = 2 * Math.PI * t + phase;
     const noise = (rand(i * 7) - 0.5) * 0.25;
     const r = radiusDeg * (1 + noise);
-    out.push({
+    const candidate = {
       lat: anchor.lat + Math.sin(angle) * r * 0.85,
       lng: anchor.lng + Math.cos(angle) * r,
-    });
+    };
+    out.push(clampToNyungwePolygon(candidate, 0.005));
   }
   return out;
 }
