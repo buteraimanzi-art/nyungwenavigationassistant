@@ -49,7 +49,36 @@ export default function AuthPage() {
     });
     setSubmitting(false);
     if (error) {
-      toast.error(error.message);
+      const msg = error.message?.toLowerCase() ?? '';
+      if (msg.includes('invalid login credentials') || msg.includes('invalid_credentials')) {
+        // Detect common email typos (e.g. gamil.com instead of gmail.com)
+        const email = parsed.data.email.toLowerCase();
+        const typoMap: Record<string, string> = {
+          'gamil.com': 'gmail.com',
+          'gmial.com': 'gmail.com',
+          'gmai.com': 'gmail.com',
+          'gnail.com': 'gmail.com',
+          'gmal.com': 'gmail.com',
+          'hotnail.com': 'hotmail.com',
+          'yaho.com': 'yahoo.com',
+          'yahooo.com': 'yahoo.com',
+          'outlok.com': 'outlook.com',
+        };
+        const domain = email.split('@')[1];
+        const suggestion = domain && typoMap[domain]
+          ? `${email.split('@')[0]}@${typoMap[domain]}`
+          : null;
+        toast.error(
+          suggestion
+            ? `❌ Email or password doesn't match. Did you mean ${suggestion}?`
+            : "❌ Email or password doesn't match. Double-check your email spelling and try again.",
+          { duration: 7000 }
+        );
+      } else if (msg.includes('email not confirmed')) {
+        toast.error('Please confirm your email address before signing in.', { duration: 6000 });
+      } else {
+        toast.error(error.message, { duration: 6000 });
+      }
       return;
     }
     toast.success('Welcome back!');
