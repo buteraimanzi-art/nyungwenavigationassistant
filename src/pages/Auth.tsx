@@ -36,15 +36,19 @@ export default function AuthPage() {
 
   const handleSignIn = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setSignInError(null);
     const formData = new FormData(event.currentTarget);
     const parsed = signInSchema.safeParse({
       email: formData.get('email'),
       password: formData.get('password'),
     });
     if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? 'Check your details');
+      const m = parsed.error.issues[0]?.message ?? 'Check your details';
+      setSignInError({ title: 'Check your details', detail: m });
+      toast.error(m);
       return;
     }
+    setLastEmail(parsed.data.email);
     setSubmitting(true);
     const { error } = await supabase.auth.signInWithPassword({
       email: parsed.data.email,
@@ -54,7 +58,6 @@ export default function AuthPage() {
     if (error) {
       const msg = error.message?.toLowerCase() ?? '';
       if (msg.includes('invalid login credentials') || msg.includes('invalid_credentials')) {
-        // Detect common email typos (e.g. gamil.com instead of gmail.com)
         const email = parsed.data.email.toLowerCase();
         const typoMap: Record<string, string> = {
           'gamil.com': 'gmail.com',
@@ -62,24 +65,31 @@ export default function AuthPage() {
           'gmai.com': 'gmail.com',
           'gnail.com': 'gmail.com',
           'gmal.com': 'gmail.com',
+          'gmaill.com': 'gmail.com',
+          'gmailcom': 'gmail.com',
           'hotnail.com': 'hotmail.com',
+          'hotmial.com': 'hotmail.com',
           'yaho.com': 'yahoo.com',
           'yahooo.com': 'yahoo.com',
           'outlok.com': 'outlook.com',
         };
-        const domain = email.split('@')[1];
-        const suggestion = domain && typoMap[domain]
-          ? `${email.split('@')[0]}@${typoMap[domain]}`
-          : null;
-        toast.error(
-          suggestion
-            ? `❌ Email or password doesn't match. Did you mean ${suggestion}?`
-            : "❌ Email or password doesn't match. Double-check your email spelling and try again.",
-          { duration: 7000 }
-        );
+        const [local, domain] = email.split('@');
+        const suggestion = domain && typoMap[domain] ? `${local}@${typoMap[domain]}` : undefined;
+        setSignInError({
+          title: "Email or password doesn't match",
+          detail: suggestion
+            ? `We couldn't find an account for "${email}". It looks like a typo.`
+            : `We couldn't find an account matching "${email}", or the password is wrong. Check the spelling of your email and your password (it's case-sensitive).`,
+          suggestion,
+        });
+        toast.error("Email or password doesn't match", { duration: 6000 });
       } else if (msg.includes('email not confirmed')) {
-        toast.error('Please confirm your email address before signing in.', { duration: 6000 });
+        setSignInError({
+          title: 'Email not confirmed',
+          detail: 'Please open the confirmation link we sent to your inbox before signing in.',
+        });
       } else {
+        setSignInError({ title: 'Sign-in failed', detail: error.message });
         toast.error(error.message, { duration: 6000 });
       }
       return;
