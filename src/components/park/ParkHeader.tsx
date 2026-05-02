@@ -5,9 +5,10 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Menu, User, Map, X, Smartphone, LogOut, ShieldCheck, KeyRound, Radio, LayoutDashboard } from 'lucide-react';
+import { Menu, User, Map, X, Smartphone, LogOut, ShieldCheck, KeyRound, Radio, LayoutDashboard, HelpCircle } from 'lucide-react';
 import nyungweLogo from '@/assets/nyungwe-logo.webp';
 import { useAuth } from '@/hooks/use-auth';
+import { openOnboardingTour } from '@/components/OnboardingTour';
 
 const navLinks = [
   { to: '/', label: 'Routes' },
@@ -144,6 +145,10 @@ export function ParkHeader() {
                         </DropdownMenuItem>
                       </>
                     )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => openOnboardingTour()}>
+                      <HelpCircle className="w-4 h-4 mr-2" />Replay tutorial
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => signOut().then(() => navigate('/auth'))}>
                       <LogOut className="w-4 h-4 mr-2" />Sign out

@@ -52,10 +52,11 @@ const STATIC_ORIGINS: Origin[] = [
   },
 ];
 
-// Nyabugogo bus station — main long-distance bus hub for Kigali → Nyungwe routes
+// Nyabugogo bus station (Nyabugogo Taxi Park) — main long-distance bus hub
+// for Kigali → Nyungwe routes. Verified coordinates of the bus terminal.
 const NYABUGOGO = {
   name: 'Nyabugogo Bus Station, Kigali',
-  coordinates: { lat: -1.9395, lng: 30.0419 },
+  coordinates: { lat: -1.9437, lng: 30.0386 },
 };
 
 function formatEta(hoursFromNow: number): string {

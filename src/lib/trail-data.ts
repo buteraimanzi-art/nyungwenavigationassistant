@@ -1,5 +1,6 @@
 import type { Trail, Attraction, RestArea } from './types';
 import { NYUNGWE_FOREST_BOUNDS } from './trail-loops';
+import { clampToNyungwePolygon, pointInNyungwe, NYUNGWE_CENTROID } from './nyungwe-boundary';
 
 export const MAP_BOUNDS = {
   north: -2.35,
@@ -27,31 +28,27 @@ interface OfficialTrailSeed {
   elevationGain?: number;
 }
 
-const ANCHOR_MARGIN = 0.012;
-
-/** Pull anchors that sit on/outside the forest edge inwards. */
+/** Pull anchors strictly inside the polygon (not just the bbox). */
 function clampAnchor(a: { lat: number; lng: number }) {
-  return {
-    lat: Math.min(
-      NYUNGWE_FOREST_BOUNDS.north - ANCHOR_MARGIN,
-      Math.max(NYUNGWE_FOREST_BOUNDS.south + ANCHOR_MARGIN, a.lat),
-    ),
-    lng: Math.min(
-      NYUNGWE_FOREST_BOUNDS.east - ANCHOR_MARGIN,
-      Math.max(NYUNGWE_FOREST_BOUNDS.west + ANCHOR_MARGIN, a.lng),
-    ),
-  };
+  return clampToNyungwePolygon(a, 0.012);
 }
 
-/** Maximum loop radius (deg) that fits inside the forest from this anchor. */
+/** Maximum loop radius (deg) that fits inside the polygon from this anchor. */
 function maxRadiusForAnchor(a: { lat: number; lng: number }): number {
-  const room = Math.min(
-    a.lat - (NYUNGWE_FOREST_BOUNDS.south + 0.008),
-    (NYUNGWE_FOREST_BOUNDS.north - 0.008) - a.lat,
-    a.lng - (NYUNGWE_FOREST_BOUNDS.west + 0.008),
-    (NYUNGWE_FOREST_BOUNDS.east - 0.008) - a.lng,
-  );
-  return Math.max(0.001, room * 0.9);
+  if (!pointInNyungwe(a)) return 0.003;
+  let minR = 0.05;
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
+    let lo = 0, hi = 0.08;
+    while (hi - lo > 0.0005) {
+      const mid = (lo + hi) / 2;
+      const test = { lat: a.lat + Math.sin(angle) * mid, lng: a.lng + Math.cos(angle) * mid };
+      if (pointInNyungwe(test)) lo = mid;
+      else hi = mid;
+    }
+    if (lo < minR) minR = lo;
+  }
+  return Math.max(0.001, minR * 0.85);
 }
 
 /**
@@ -74,10 +71,11 @@ function sampleLoopPositions(seed: OfficialTrailSeed, count: number, phase: numb
     const angle = 2 * Math.PI * t + phase;
     const noise = (rand(i * 7) - 0.5) * 0.25;
     const r = radiusDeg * (1 + noise);
-    out.push({
+    const candidate = {
       lat: anchor.lat + Math.sin(angle) * r * 0.85,
       lng: anchor.lng + Math.cos(angle) * r,
-    });
+    };
+    out.push(clampToNyungwePolygon(candidate, 0.005));
   }
   return out;
 }

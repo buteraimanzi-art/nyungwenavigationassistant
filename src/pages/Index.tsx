@@ -13,6 +13,7 @@ import { GettingThereMap } from '@/components/park/GettingThereMap';
 import { ReliveCommunityFeed } from '@/components/park/ReliveCommunityFeed';
 import { ReliveUploadButton } from '@/components/park/ReliveUploadButton';
 import { TrailAccessGate } from '@/components/park/TrailAccessGate';
+import { OnboardingTour } from '@/components/OnboardingTour';
 import { trails, calculateTrailProgress } from '@/lib/trail-data';
 import { useDemoLocation } from '@/hooks/use-location';
 import { useRealRoute } from '@/hooks/use-real-route';
@@ -142,6 +143,7 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <OnboardingTour />
       <ParkHeader />
 
       {showTrailSelector ? (
