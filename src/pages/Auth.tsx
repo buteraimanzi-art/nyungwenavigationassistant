@@ -232,6 +232,7 @@ export default function AuthPage() {
           </Tabs>
         </CardContent>
       </Card>
+      <ForgotPasswordDialog open={forgotOpen} defaultEmail={lastEmail} onClose={() => setForgotOpen(false)} />
     </div>
   );
 }
