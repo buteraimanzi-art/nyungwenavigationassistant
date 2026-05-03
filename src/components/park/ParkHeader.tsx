@@ -105,7 +105,7 @@ export function ParkHeader() {
             </Button>
 
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger asChild data-tour="account-menu">
                 <Button
                   size="sm"
                   className="rounded-full gradient-primary text-primary-foreground hover:shadow-glow px-4 font-medium border-0 transition-smooth"

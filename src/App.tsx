@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ReliveProvider } from "@/hooks/ReliveProvider";
 import { AuthProvider } from "@/hooks/use-auth";
 import { RequireAuth } from "@/components/RequireAuth";
+import { IndemnityGate } from "@/components/IndemnityGate";
 import Index from "./pages/Index.tsx";
 import Planner from "./pages/Planner.tsx";
 import Features from "./pages/Features.tsx";
@@ -28,6 +29,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <IndemnityGate>
             <Routes>
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/reset-password" element={<ResetPassword />} />
@@ -42,6 +44,7 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </IndemnityGate>
           </TooltipProvider>
         </ReliveProvider>
       </AuthProvider>
