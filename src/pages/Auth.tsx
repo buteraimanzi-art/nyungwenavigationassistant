@@ -30,6 +30,7 @@ export default function AuthPage() {
   const [submitting, setSubmitting] = useState(false);
   const [signInError, setSignInError] = useState<{ title: string; detail: string; suggestion?: string } | null>(null);
   const [lastEmail, setLastEmail] = useState('');
+  const [forgotOpen, setForgotOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && user) navigate('/', { replace: true });
