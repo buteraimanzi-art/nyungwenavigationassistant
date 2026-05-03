@@ -11,6 +11,7 @@ import Planner from "./pages/Planner.tsx";
 import Features from "./pages/Features.tsx";
 import Updates from "./pages/Updates.tsx";
 import AuthPage from "./pages/Auth.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
 import AdminAlerts from "./pages/AdminAlerts.tsx";
 import AdminCodes from "./pages/AdminCodes.tsx";
@@ -29,6 +30,7 @@ const App = () => (
             <Sonner />
             <Routes>
               <Route path="/auth" element={<AuthPage />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/" element={<RequireAuth><Index /></RequireAuth>} />
               <Route path="/planner" element={<RequireAuth><Planner /></RequireAuth>} />
               <Route path="/features" element={<RequireAuth><Features /></RequireAuth>} />

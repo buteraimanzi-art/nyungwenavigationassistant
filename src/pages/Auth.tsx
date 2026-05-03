@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import nyungweLogo from '@/assets/nyungwe-logo.webp';
+import { ForgotPasswordDialog } from '@/components/ForgotPasswordDialog';
 
 const signInSchema = z.object({
   email: z.string().trim().email({ message: 'Enter a valid email' }).max(255),
@@ -29,6 +30,7 @@ export default function AuthPage() {
   const [submitting, setSubmitting] = useState(false);
   const [signInError, setSignInError] = useState<{ title: string; detail: string; suggestion?: string } | null>(null);
   const [lastEmail, setLastEmail] = useState('');
+  const [forgotOpen, setForgotOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && user) navigate('/', { replace: true });
@@ -185,7 +187,16 @@ export default function AuthPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="signin-password">Password</Label>
+                    <button
+                      type="button"
+                      onClick={() => setForgotOpen(true)}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
                   <Input id="signin-password" name="password" type="password" autoComplete="current-password" required />
                 </div>
                 <Button type="submit" className="w-full" disabled={submitting}>
@@ -221,6 +232,7 @@ export default function AuthPage() {
           </Tabs>
         </CardContent>
       </Card>
+      <ForgotPasswordDialog open={forgotOpen} defaultEmail={lastEmail} onClose={() => setForgotOpen(false)} />
     </div>
   );
 }
