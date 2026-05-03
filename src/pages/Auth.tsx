@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import nyungweLogo from '@/assets/nyungwe-logo.webp';
+import { ForgotPasswordDialog } from '@/components/ForgotPasswordDialog';
 
 const signInSchema = z.object({
   email: z.string().trim().email({ message: 'Enter a valid email' }).max(255),
