@@ -54,23 +54,42 @@ export function TrailAccessGate({ trail, onUnlocked, onCancel }: TrailAccessGate
 
     const { data: codeRow, error: codeErr } = await supabase
       .from('trail_access_codes')
-      .select('id, trail_id, active')
+      .select('id, trail_id, trail_name, active')
       .eq('code', cleaned)
       .maybeSingle();
 
     if (codeErr || !codeRow) {
       setChecking(false);
-      toast.error('Invalid access code');
+      toast.error('Invalid access code', { description: 'No such code exists. Double-check with reception.' });
       return;
     }
     if (!codeRow.active) {
       setChecking(false);
-      toast.error('This code has been revoked');
+      toast.error('Code already used or revoked', {
+        description: 'Each access code is single-use. Request a new one from park staff.',
+      });
       return;
     }
     if (codeRow.trail_id !== trail.id) {
       setChecking(false);
-      toast.error('This code is for a different trail');
+      toast.error('Wrong trail', {
+        description: `This code unlocks "${codeRow.trail_name}", not "${trail.name}".`,
+      });
+      return;
+    }
+
+    // Check this code hasn't been redeemed by anyone else (single-use enforcement).
+    const { count: usedCount } = await supabase
+      .from('trail_redemptions')
+      .select('id', { count: 'exact', head: true })
+      .eq('code_id', codeRow.id);
+    if ((usedCount ?? 0) > 0) {
+      // Auto-revoke leaked code
+      await supabase.from('trail_access_codes').update({ active: false }).eq('id', codeRow.id);
+      setChecking(false);
+      toast.error('Code already redeemed', {
+        description: 'This code was used by another hiker and is now disabled.',
+      });
       return;
     }
 
@@ -80,12 +99,17 @@ export function TrailAccessGate({ trail, onUnlocked, onCancel }: TrailAccessGate
       trail_id: trail.id,
       trail_name: trail.name,
     });
-    setChecking(false);
-    if (redErr && !redErr.message.includes('duplicate')) {
+    if (redErr) {
+      setChecking(false);
       toast.error(redErr.message);
       return;
     }
-    toast.success(`${trail.name} unlocked`);
+
+    // Single-use: deactivate code immediately after successful redemption.
+    await supabase.from('trail_access_codes').update({ active: false }).eq('id', codeRow.id);
+
+    setChecking(false);
+    toast.success(`${trail.name} unlocked`, { description: 'This code is now spent and cannot be reused.' });
     onUnlocked();
   };
 
