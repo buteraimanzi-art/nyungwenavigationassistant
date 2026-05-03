@@ -220,7 +220,7 @@ export default function Index() {
           </div>
 
           {/* Getting to Nyungwe */}
-          <div id="getting-there" className="gradient-subtle py-12 sm:py-20 border-b border-border/60">
+          <div id="getting-there" data-tour="getting-there" className="gradient-subtle py-12 sm:py-20 border-b border-border/60">
             <div className="container max-w-6xl mx-auto px-4">
               <div className="mb-6 sm:mb-8 max-w-2xl animate-fade-in-up">
                 <p className="uppercase tracking-[0.2em] text-xs font-semibold text-primary mb-3">
@@ -238,7 +238,7 @@ export default function Index() {
           </div>
 
           {/* Trail cards */}
-          <div id="trails" className="relative bg-komoot-beige py-12 sm:py-20 flex-1 overflow-hidden">
+          <div id="trails" data-tour="trails" className="relative bg-komoot-beige py-12 sm:py-20 flex-1 overflow-hidden">
             <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl -translate-y-1/2 translate-x-1/3" />
             <div className="container max-w-6xl mx-auto px-4 relative">
               <div className="mb-8 sm:mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-fade-in-up">
@@ -266,7 +266,7 @@ export default function Index() {
             <ReliveCommunityFeed limit={6} />
           </div>
 
-          <EmergencySOS userLocation={userLocation} trailId="" trailName="General" />
+          <div data-tour="sos"><EmergencySOS userLocation={userLocation} trailId="" trailName="General" /></div>
         </main>
       ) : selectedTrail ? (
         <>
