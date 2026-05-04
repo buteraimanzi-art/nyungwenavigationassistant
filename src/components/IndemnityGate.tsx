@@ -73,6 +73,10 @@ export function IndemnityGate({ children }: { children: React.ReactNode }) {
       return;
     }
     toast({ title: 'Thank you', description: 'Agreement signed. Enjoy Nyungwe 🌿' });
+    try {
+      localStorage.setItem('nyungwe.indemnity.accepted', '1');
+      window.dispatchEvent(new Event('nyungwe:indemnity-accepted'));
+    } catch { /* ignore */ }
     setAccepted(true);
   };
 
