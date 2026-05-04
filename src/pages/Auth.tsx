@@ -13,6 +13,7 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import nyungweLogo from '@/assets/nyungwe-logo.webp';
 import { ForgotPasswordDialog } from '@/components/ForgotPasswordDialog';
+import { EmailCodeSignIn } from '@/components/EmailCodeSignIn';
 
 const signInSchema = z.object({
   email: z.string().trim().email({ message: 'Enter a valid email' }).max(255),
@@ -26,7 +27,7 @@ const signUpSchema = signInSchema.extend({
 export default function AuthPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const [tab, setTab] = useState<'signin' | 'signup'>('signin');
+  const [tab, setTab] = useState<'signin' | 'signup' | 'code'>('signin');
   const [submitting, setSubmitting] = useState(false);
   const [signInError, setSignInError] = useState<{ title: string; detail: string; suggestion?: string } | null>(null);
   const [lastEmail, setLastEmail] = useState('');
@@ -144,11 +145,15 @@ export default function AuthPage() {
           </p>
         </CardHeader>
         <CardContent>
-          <Tabs value={tab} onValueChange={(value) => setTab(value as 'signin' | 'signup')}>
-            <TabsList className="grid w-full grid-cols-2">
+          <Tabs value={tab} onValueChange={(value) => setTab(value as 'signin' | 'signup' | 'code')}>
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="signin">Sign in</TabsTrigger>
+              <TabsTrigger value="code">Email code</TabsTrigger>
               <TabsTrigger value="signup">Sign up</TabsTrigger>
             </TabsList>
+            <TabsContent value="code" className="mt-4">
+              <EmailCodeSignIn />
+            </TabsContent>
 
             <TabsContent value="signin" className="mt-4">
               <form className="space-y-4" onSubmit={handleSignIn}>
