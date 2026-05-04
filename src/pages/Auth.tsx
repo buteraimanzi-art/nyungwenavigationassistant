@@ -144,11 +144,15 @@ export default function AuthPage() {
           </p>
         </CardHeader>
         <CardContent>
-          <Tabs value={tab} onValueChange={(value) => setTab(value as 'signin' | 'signup')}>
-            <TabsList className="grid w-full grid-cols-2">
+          <Tabs value={tab} onValueChange={(value) => setTab(value as 'signin' | 'signup' | 'code')}>
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="signin">Sign in</TabsTrigger>
+              <TabsTrigger value="code">Email code</TabsTrigger>
               <TabsTrigger value="signup">Sign up</TabsTrigger>
             </TabsList>
+            <TabsContent value="code" className="mt-4">
+              <EmailCodeSignIn />
+            </TabsContent>
 
             <TabsContent value="signin" className="mt-4">
               <form className="space-y-4" onSubmit={handleSignIn}>
