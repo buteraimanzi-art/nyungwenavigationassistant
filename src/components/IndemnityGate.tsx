@@ -36,7 +36,11 @@ export function IndemnityGate({ children }: { children: React.ReactNode }) {
       .maybeSingle()
       .then(({ data }) => {
         if (!active) return;
-        setAccepted(!!data?.indemnity_accepted_at);
+        const ok = !!data?.indemnity_accepted_at;
+        setAccepted(ok);
+        if (ok) {
+          try { localStorage.setItem('nyungwe.indemnity.accepted', '1'); } catch { /* ignore */ }
+        }
         if (data?.full_name) setFullName(data.full_name);
       });
     return () => {
@@ -69,6 +73,10 @@ export function IndemnityGate({ children }: { children: React.ReactNode }) {
       return;
     }
     toast({ title: 'Thank you', description: 'Agreement signed. Enjoy Nyungwe 🌿' });
+    try {
+      localStorage.setItem('nyungwe.indemnity.accepted', '1');
+      window.dispatchEvent(new Event('nyungwe:indemnity-accepted'));
+    } catch { /* ignore */ }
     setAccepted(true);
   };
 

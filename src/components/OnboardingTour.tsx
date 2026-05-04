@@ -86,13 +86,23 @@ export function OnboardingTour() {
   const [rect, setRect] = useState<Rect | null>(null);
 
   useEffect(() => {
-    try {
-      if (!localStorage.getItem(STORAGE_KEY)) {
-        // tiny delay to let page render
-        const t = setTimeout(() => setOpen(true), 600);
-        return () => clearTimeout(t);
-      }
-    } catch { /* ignore */ }
+    let cancelled = false;
+    const tryOpen = () => {
+      try {
+        if (localStorage.getItem(STORAGE_KEY)) return;
+        // Wait until the indemnity has been signed so we don't cover its dialog
+        if (localStorage.getItem('nyungwe.indemnity.accepted') !== '1') return;
+        if (cancelled) return;
+        setOpen(true);
+      } catch { /* ignore */ }
+    };
+    const t = setTimeout(tryOpen, 800);
+    window.addEventListener('nyungwe:indemnity-accepted', tryOpen);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+      window.removeEventListener('nyungwe:indemnity-accepted', tryOpen);
+    };
   }, []);
 
   useEffect(() => {
