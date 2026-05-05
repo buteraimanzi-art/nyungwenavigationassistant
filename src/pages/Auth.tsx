@@ -34,6 +34,7 @@ export default function AuthPage() {
   const [signInError, setSignInError] = useState<{ title: string; detail: string; suggestion?: string } | null>(null);
   const [lastEmail, setLastEmail] = useState('');
   const [forgotOpen, setForgotOpen] = useState(false);
+  const { theme, toggle: toggleTheme } = useTheme();
 
   useEffect(() => {
     if (!loading && user) navigate('/', { replace: true });
