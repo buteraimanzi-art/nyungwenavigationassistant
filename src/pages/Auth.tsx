@@ -14,6 +14,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import nyungweLogo from '@/assets/nyungwe-logo.webp';
 import { ForgotPasswordDialog } from '@/components/ForgotPasswordDialog';
 import { EmailCodeSignIn } from '@/components/EmailCodeSignIn';
+import { useTheme } from '@/hooks/use-theme';
+import { Sun, Moon } from 'lucide-react';
 
 const signInSchema = z.object({
   email: z.string().trim().email({ message: 'Enter a valid email' }).max(255),
@@ -32,6 +34,7 @@ export default function AuthPage() {
   const [signInError, setSignInError] = useState<{ title: string; detail: string; suggestion?: string } | null>(null);
   const [lastEmail, setLastEmail] = useState('');
   const [forgotOpen, setForgotOpen] = useState(false);
+  const { theme, toggle: toggleTheme } = useTheme();
 
   useEffect(() => {
     if (!loading && user) navigate('/', { replace: true });
@@ -132,7 +135,17 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-10">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-10 relative">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onClick={toggleTheme}
+        aria-label="Toggle theme"
+        className="absolute top-4 right-4 rounded-full"
+      >
+        {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+      </Button>
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="items-center text-center space-y-3">
           <Link to="/" className="flex items-center gap-2">
@@ -146,12 +159,29 @@ export default function AuthPage() {
         </CardHeader>
         <CardContent>
           <Tabs value={tab} onValueChange={(value) => setTab(value as 'signin' | 'signup' | 'code')}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="signin">Sign in</TabsTrigger>
-              <TabsTrigger value="code">Email code</TabsTrigger>
-              <TabsTrigger value="signup">Sign up</TabsTrigger>
-            </TabsList>
-            <TabsContent value="code" className="mt-4">
+            <div className="rounded-2xl border border-border bg-secondary/40 p-1.5 shadow-inner">
+              <TabsList className="grid w-full grid-cols-3 bg-transparent gap-1 h-auto p-0">
+                <TabsTrigger
+                  value="signin"
+                  className="rounded-xl py-2.5 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md transition-smooth"
+                >
+                  Sign in
+                </TabsTrigger>
+                <TabsTrigger
+                  value="code"
+                  className="rounded-xl py-2.5 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md transition-smooth"
+                >
+                  Email code
+                </TabsTrigger>
+                <TabsTrigger
+                  value="signup"
+                  className="rounded-xl py-2.5 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md transition-smooth"
+                >
+                  Sign up
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent value="code" className="mt-6">
               <EmailCodeSignIn />
             </TabsContent>
 

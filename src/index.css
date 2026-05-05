@@ -85,54 +85,50 @@
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  .dark {
-    --background: 30 12% 7%;
-    --foreground: 38 22% 94%;
-
-    --card: 30 12% 10%;
-    --card-foreground: 38 22% 94%;
-
-    --popover: 30 12% 10%;
-    --popover-foreground: 38 22% 94%;
-
-    --primary: 88 42% 48%;
-    --primary-foreground: 30 12% 7%;
-    --primary-glow: 88 50% 58%;
-
-    --secondary: 30 12% 16%;
-    --secondary-foreground: 38 18% 90%;
-
-    --muted: 30 12% 16%;
-    --muted-foreground: 38 10% 62%;
-
-    --accent: 28 78% 56%;
-    --accent-foreground: 30 12% 7%;
-    --accent-glow: 32 88% 66%;
-
-    --destructive: 0 62% 45%;
+  /* Light theme — original earthy palette */
+  .light {
+    --background: 38 30% 98%;
+    --foreground: 30 18% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 30 18% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 30 18% 12%;
+    --primary: 88 38% 28%;
+    --primary-foreground: 40 30% 98%;
+    --primary-glow: 88 42% 42%;
+    --secondary: 38 22% 94%;
+    --secondary-foreground: 30 18% 22%;
+    --muted: 38 18% 94%;
+    --muted-foreground: 30 8% 42%;
+    --accent: 28 72% 50%;
+    --accent-foreground: 0 0% 100%;
+    --accent-glow: 32 88% 62%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-
-    --border: 30 12% 20%;
-    --input: 30 12% 20%;
-    --ring: 88 42% 48%;
-
-    --komoot-header: 30 12% 9%;
-    --komoot-header-foreground: 38 22% 92%;
-    --komoot-beige: 30 12% 12%;
-    --komoot-olive: 88 42% 48%;
-    --komoot-brown: 28 16% 52%;
-
-    --sidebar-background: 30 12% 8%;
-    --sidebar-foreground: 38 18% 90%;
-    --sidebar-primary: 88 42% 48%;
+    --border: 30 14% 88%;
+    --input: 30 14% 88%;
+    --ring: 88 38% 28%;
+    --komoot-header: 38 30% 97%;
+    --komoot-header-foreground: 30 22% 14%;
+    --komoot-beige: 38 32% 95%;
+    --komoot-olive: 88 38% 28%;
+    --komoot-brown: 28 30% 28%;
+    --sidebar-background: 38 22% 96%;
+    --sidebar-foreground: 30 18% 14%;
+    --sidebar-primary: 88 38% 28%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 30 12% 14%;
-    --sidebar-accent-foreground: 38 18% 90%;
-    --sidebar-border: 30 12% 18%;
-    --sidebar-ring: 88 42% 50%;
-
-    --gradient-card: linear-gradient(180deg, hsl(30 12% 12%) 0%, hsl(30 12% 9%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(30 12% 9%) 0%, hsl(30 12% 7%) 100%);
+    --sidebar-accent: 38 22% 91%;
+    --sidebar-accent-foreground: 30 18% 14%;
+    --sidebar-border: 30 14% 88%;
+    --sidebar-ring: 88 38% 32%;
+    --trail-marker: 28 80% 52%;
+    --gradient-hero: linear-gradient(135deg, hsl(88 50% 18% / 0.85) 0%, hsl(28 30% 18% / 0.55) 50%, hsl(88 38% 22% / 0.8) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(38 22% 97%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(38 30% 98%) 0%, hsl(38 22% 95%) 100%);
+    --shadow-sm: 0 1px 2px hsl(30 18% 12% / 0.04), 0 1px 3px hsl(30 18% 12% / 0.06);
+    --shadow-md: 0 4px 12px hsl(30 18% 12% / 0.06), 0 2px 4px hsl(30 18% 12% / 0.04);
+    --shadow-lg: 0 12px 32px hsl(30 18% 12% / 0.08), 0 4px 8px hsl(30 18% 12% / 0.04);
+    --shadow-xl: 0 24px 56px hsl(30 18% 12% / 0.12), 0 8px 16px hsl(30 18% 12% / 0.06);
   }
 }
 
