@@ -146,12 +146,29 @@ export default function AuthPage() {
         </CardHeader>
         <CardContent>
           <Tabs value={tab} onValueChange={(value) => setTab(value as 'signin' | 'signup' | 'code')}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="signin">Sign in</TabsTrigger>
-              <TabsTrigger value="code">Email code</TabsTrigger>
-              <TabsTrigger value="signup">Sign up</TabsTrigger>
-            </TabsList>
-            <TabsContent value="code" className="mt-4">
+            <div className="rounded-2xl border border-border bg-secondary/40 p-1.5 shadow-inner">
+              <TabsList className="grid w-full grid-cols-3 bg-transparent gap-1 h-auto p-0">
+                <TabsTrigger
+                  value="signin"
+                  className="rounded-xl py-2.5 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md transition-smooth"
+                >
+                  Sign in
+                </TabsTrigger>
+                <TabsTrigger
+                  value="code"
+                  className="rounded-xl py-2.5 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md transition-smooth"
+                >
+                  Email code
+                </TabsTrigger>
+                <TabsTrigger
+                  value="signup"
+                  className="rounded-xl py-2.5 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md transition-smooth"
+                >
+                  Sign up
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent value="code" className="mt-6">
               <EmailCodeSignIn />
             </TabsContent>
 
