@@ -5,9 +5,10 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Menu, User, Map, X, Smartphone, LogOut, ShieldCheck, KeyRound, Radio, LayoutDashboard, HelpCircle } from 'lucide-react';
+import { Menu, User, Map, X, Smartphone, LogOut, ShieldCheck, KeyRound, Radio, LayoutDashboard, HelpCircle, Sun, Moon } from 'lucide-react';
 import nyungweLogo from '@/assets/nyungwe-logo.webp';
 import { useAuth } from '@/hooks/use-auth';
+import { useTheme } from '@/hooks/use-theme';
 import { openOnboardingTour } from '@/components/OnboardingTour';
 
 const navLinks = [
@@ -23,6 +24,7 @@ export function ParkHeader() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAdmin, signOut } = useAuth();
+  const { theme, toggle: toggleTheme } = useTheme();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -84,6 +86,15 @@ export function ParkHeader() {
           <div className="hidden md:block h-6 w-px bg-border/70" />
 
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+              className="rounded-full text-foreground/70 hover:text-foreground hover:bg-secondary"
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
             {isAdmin && (
               <Button
                 variant="outline"

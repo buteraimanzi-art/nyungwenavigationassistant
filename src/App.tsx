@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ReliveProvider } from "@/hooks/ReliveProvider";
 import { AuthProvider } from "@/hooks/use-auth";
+import { ThemeProvider } from "@/hooks/use-theme";
 import { RequireAuth } from "@/components/RequireAuth";
 import { IndemnityGate } from "@/components/IndemnityGate";
 import Index from "./pages/Index.tsx";
@@ -24,6 +25,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
+      <ThemeProvider>
       <AuthProvider>
         <ReliveProvider>
           <TooltipProvider>
@@ -48,6 +50,7 @@ const App = () => (
           </TooltipProvider>
         </ReliveProvider>
       </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   </QueryClientProvider>
 );
