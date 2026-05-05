@@ -4,31 +4,31 @@
 
 @layer base {
   :root {
-    /* Refined earthy palette — warmer, calmer, more decent */
-    --background: 38 30% 98%;
-    --foreground: 30 18% 12%;
+    /* Dark warm theme — charcoal background, vivid orange accents */
+    --background: 24 14% 9%;
+    --foreground: 30 25% 94%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 30 18% 12%;
+    --card: 24 14% 12%;
+    --card-foreground: 30 25% 94%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 30 18% 12%;
+    --popover: 24 14% 12%;
+    --popover-foreground: 30 25% 94%;
 
-    /* Deep forest olive — refined */
-    --primary: 88 38% 28%;
-    --primary-foreground: 40 30% 98%;
-    --primary-glow: 88 42% 42%;
+    /* Vivid orange primary */
+    --primary: 24 95% 58%;
+    --primary-foreground: 24 20% 8%;
+    --primary-glow: 28 100% 66%;
 
-    --secondary: 38 22% 94%;
-    --secondary-foreground: 30 18% 22%;
+    --secondary: 24 10% 16%;
+    --secondary-foreground: 30 25% 94%;
 
-    --muted: 38 18% 94%;
-    --muted-foreground: 30 8% 42%;
+    --muted: 24 10% 16%;
+    --muted-foreground: 30 12% 66%;
 
-    /* Warm amber accent */
-    --accent: 28 72% 50%;
-    --accent-foreground: 0 0% 100%;
-    --accent-glow: 32 88% 62%;
+    /* Warm orange accent */
+    --accent: 24 95% 58%;
+    --accent-foreground: 24 20% 8%;
+    --accent-glow: 28 100% 66%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
