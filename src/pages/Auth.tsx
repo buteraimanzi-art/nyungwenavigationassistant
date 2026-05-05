@@ -14,6 +14,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import nyungweLogo from '@/assets/nyungwe-logo.webp';
 import { ForgotPasswordDialog } from '@/components/ForgotPasswordDialog';
 import { EmailCodeSignIn } from '@/components/EmailCodeSignIn';
+import { useTheme } from '@/hooks/use-theme';
+import { Sun, Moon } from 'lucide-react';
 
 const signInSchema = z.object({
   email: z.string().trim().email({ message: 'Enter a valid email' }).max(255),
