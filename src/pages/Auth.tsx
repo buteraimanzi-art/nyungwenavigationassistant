@@ -135,7 +135,17 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-10">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-10 relative">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onClick={toggleTheme}
+        aria-label="Toggle theme"
+        className="absolute top-4 right-4 rounded-full"
+      >
+        {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+      </Button>
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="items-center text-center space-y-3">
           <Link to="/" className="flex items-center gap-2">
