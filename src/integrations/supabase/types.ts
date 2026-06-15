@@ -240,6 +240,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_get_hiker_identities: {
+        Args: { _ids: string[] }
+        Returns: {
+          email: string
+          full_name: string
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

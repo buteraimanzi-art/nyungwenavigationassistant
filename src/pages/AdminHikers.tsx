@@ -16,10 +16,25 @@ import { NYUNGWE_POLYGON_LATLNG } from '@/lib/nyungwe-boundary';
 import { useEffect as useEffectMap, useRef } from 'react';
 
 type Hiker = Database['public']['Tables']['user_locations']['Row'];
+type Identity = { email: string | null; full_name: string | null };
+
+// Deterministic color from user id (golden-angle hue)
+function colorForUser(id: string): string {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  const hue = (hash * 137.508) % 360;
+  return `hsl(${hue.toFixed(0)}, 75%, 45%)`;
+}
+
+function labelForHiker(id: string, ident?: Identity): string {
+  if (ident?.full_name && ident.full_name.trim()) return ident.full_name.trim();
+  if (ident?.email) return ident.email;
+  return `User ${id.slice(0, 8)}…`;
+}
 
 const PARK_CENTER: [number, number] = [-2.45, 29.25];
 
-function HikerMap({ hikers }: { hikers: Hiker[] }) {
+function HikerMap({ hikers, identities }: { hikers: Hiker[]; identities: Record<string, Identity> }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
@@ -45,16 +60,24 @@ function HikerMap({ hikers }: { hikers: Hiker[] }) {
     hikers.forEach((h) => {
       const ageMs = Date.now() - new Date(h.updated_at).getTime();
       const stale = ageMs > 5 * 60_000;
-      const color = stale ? '#94a3b8' : '#2563eb';
+      const color = stale ? '#94a3b8' : colorForUser(h.user_id);
+      const ident = identities[h.user_id];
+      const label = labelForHiker(h.user_id, ident);
+      const initial = (label[0] ?? '?').toUpperCase();
+      const safeLabel = label.replace(/</g, '&lt;');
       const icon = L.divIcon({
-        html: `<div style="position:relative;width:24px;height:24px;">
-          ${stale ? '' : `<span style="position:absolute;inset:-6px;border-radius:9999px;background:${color};opacity:0.35;animation:hikerPulse 1.6s ease-out infinite"></span>`}
-          <div style="position:relative;background:${color};color:white;border-radius:9999px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)">●</div>
+        html: `<div style="position:relative;display:flex;flex-direction:column;align-items:center;transform:translateY(-6px);">
+          <div style="position:relative;width:28px;height:28px;">
+            ${stale ? '' : `<span style="position:absolute;inset:-7px;border-radius:9999px;background:${color};opacity:0.35;animation:hikerPulse 1.6s ease-out infinite"></span>`}
+            <div style="position:relative;background:${color};color:white;border-radius:9999px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35)">${initial}</div>
+          </div>
+          <div style="margin-top:4px;background:white;color:#0f172a;font-size:11px;font-weight:600;padding:2px 6px;border-radius:6px;border:1px solid ${color};max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 3px rgba(0,0,0,0.2)">${safeLabel}</div>
         </div><style>@keyframes hikerPulse{0%{transform:scale(1);opacity:0.45}100%{transform:scale(2.4);opacity:0}}</style>`,
-        className: '', iconSize: [24, 24], iconAnchor: [12, 12],
+        className: '', iconSize: [160, 56], iconAnchor: [80, 14],
       });
+      const emailLine = ident?.email ? `<br/><span style="font-size:11px;color:#64748b">${ident.email}</span>` : '';
       L.marker([h.latitude, h.longitude], { icon })
-        .bindPopup(`<div style="font-family:inherit"><b>${h.trail_name ?? 'Hiker'}</b><br/><span style="font-size:11px;color:#64748b">User ${h.user_id.slice(0, 8)}…</span><br/><span style="font-size:11px">${stale ? 'Last seen' : 'Updated'} ${new Date(h.updated_at).toLocaleTimeString()}</span></div>`)
+        .bindPopup(`<div style="font-family:inherit;min-width:160px"><b style="color:${color}">${safeLabel}</b>${emailLine}<br/><span style="font-size:11px">${h.trail_name ?? 'No trail'}</span><br/><span style="font-size:11px;color:#64748b">${stale ? 'Last seen' : 'Updated'} ${new Date(h.updated_at).toLocaleTimeString()}</span></div>`)
         .addTo(layer);
     });
     if (hikers.length === 1) {
@@ -63,7 +86,7 @@ function HikerMap({ hikers }: { hikers: Hiker[] }) {
       const bounds = L.latLngBounds(hikers.map((h) => [h.latitude, h.longitude] as [number, number]));
       map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
     }
-  }, [hikers]);
+  }, [hikers, identities]);
 
   return <div className="relative w-full h-[480px] rounded-lg overflow-hidden border border-border"><div ref={containerRef} className="absolute inset-0" /></div>;
 }
@@ -71,6 +94,27 @@ function HikerMap({ hikers }: { hikers: Hiker[] }) {
 export default function AdminHikers() {
   const { user, isAdmin, loading } = useAuth();
   const [hikers, setHikers] = useState<Hiker[] | null>(null);
+  const [identities, setIdentities] = useState<Record<string, Identity>>({});
+
+  // Fetch identities for any user ids we don't yet have
+  useEffect(() => {
+    if (!isAdmin || !hikers || hikers.length === 0) return;
+    const missing = hikers.map((h) => h.user_id).filter((id) => !(id in identities));
+    if (missing.length === 0) return;
+    let cancelled = false;
+    (supabase.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data: { user_id: string; email: string | null; full_name: string | null }[] | null }>)
+      ('admin_get_hiker_identities', { _ids: missing })
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        setIdentities((prev) => {
+          const next = { ...prev };
+          for (const id of missing) next[id] = { email: null, full_name: null };
+          for (const row of data) next[row.user_id] = { email: row.email, full_name: row.full_name };
+          return next;
+        });
+      });
+    return () => { cancelled = true; };
+  }, [hikers, isAdmin, identities]);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -146,7 +190,7 @@ export default function AdminHikers() {
             <CardTitle className="text-base flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /> Map</CardTitle>
           </CardHeader>
           <CardContent>
-            <HikerMap hikers={hikers ?? []} />
+            <HikerMap hikers={hikers ?? []} identities={identities} />
             <div className="flex flex-wrap gap-3 mt-3 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#2563eb]" />Active (&lt; 5 min)</span>
               <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#94a3b8]" />Stale</span>
@@ -165,12 +209,17 @@ export default function AdminHikers() {
               <div className="divide-y divide-border">
                 {hikers.map((h) => {
                   const stale = Date.now() - new Date(h.updated_at).getTime() > 5 * 60_000;
+                  const ident = identities[h.user_id];
+                  const label = labelForHiker(h.user_id, ident);
+                  const color = stale ? 'hsl(var(--muted-foreground))' : colorForUser(h.user_id);
                   return (
                     <div key={h.user_id} className="py-3 flex items-center gap-3 text-sm">
-                      <span className={`h-2.5 w-2.5 rounded-full ${stale ? 'bg-muted-foreground' : 'bg-primary animate-pulse'}`} />
+                      <span className="h-3 w-3 rounded-full shrink-0" style={{ background: color, boxShadow: stale ? 'none' : `0 0 0 3px ${color}33` }} />
                       <div className="min-w-0 flex-1">
-                        <div className="font-medium truncate">{h.trail_name ?? 'No trail'}</div>
-                        <div className="text-xs text-muted-foreground font-mono">User {h.user_id.slice(0, 8)}…</div>
+                        <div className="font-medium truncate" style={{ color }}>{label}</div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {ident?.email && ident.full_name ? ident.email + ' · ' : ''}{h.trail_name ?? 'No trail'}
+                        </div>
                       </div>
                       <a href={`https://www.google.com/maps?q=${h.latitude},${h.longitude}`} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline whitespace-nowrap">
                         {h.latitude.toFixed(4)}, {h.longitude.toFixed(4)}
