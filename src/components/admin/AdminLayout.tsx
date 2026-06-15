@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ParkHeader } from '@/components/park/ParkHeader';
 import { Button } from '@/components/ui/button';
 import {
-  ArrowLeft, LayoutDashboard, Siren, KeyRound, Radio,
+  ArrowLeft, LayoutDashboard, Siren, KeyRound, Radio, Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -12,6 +12,7 @@ const TABS = [
   { to: '/admin/alerts', label: 'Emergencies', icon: Siren },
   { to: '/admin/codes', label: 'Access codes', icon: KeyRound },
   { to: '/admin/hikers', label: 'Live hikers', icon: Radio },
+  { to: '/admin/about', label: 'About us', icon: Users },
 ];
 
 interface AdminLayoutProps {

@@ -190,7 +190,7 @@ export default function AdminHikers() {
             <CardTitle className="text-base flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /> Map</CardTitle>
           </CardHeader>
           <CardContent>
-            <HikerMap hikers={hikers ?? []} identities={identities} />
+            <HikerMap hikers={active} identities={identities} />
             <div className="flex flex-wrap gap-3 mt-3 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#2563eb]" />Active (&lt; 5 min)</span>
               <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#94a3b8]" />Stale</span>
@@ -199,22 +199,21 @@ export default function AdminHikers() {
         </Card>
 
         <Card>
-          <CardHeader className="pb-3"><CardTitle className="text-base">All hikers</CardTitle></CardHeader>
+          <CardHeader className="pb-3"><CardTitle className="text-base">Live hikers</CardTitle></CardHeader>
           <CardContent>
             {hikers === null ? (
               <div className="py-8 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
-            ) : hikers.length === 0 ? (
-              <div className="py-8 text-center text-sm text-muted-foreground">No hikers have shared their location yet.</div>
+            ) : active.length === 0 ? (
+              <div className="py-8 text-center text-sm text-muted-foreground">No hikers are currently live.</div>
             ) : (
               <div className="divide-y divide-border">
-                {hikers.map((h) => {
-                  const stale = Date.now() - new Date(h.updated_at).getTime() > 5 * 60_000;
+                {active.map((h) => {
                   const ident = identities[h.user_id];
                   const label = labelForHiker(h.user_id, ident);
-                  const color = stale ? 'hsl(var(--muted-foreground))' : colorForUser(h.user_id);
+                  const color = colorForUser(h.user_id);
                   return (
                     <div key={h.user_id} className="py-3 flex items-center gap-3 text-sm">
-                      <span className="h-3 w-3 rounded-full shrink-0" style={{ background: color, boxShadow: stale ? 'none' : `0 0 0 3px ${color}33` }} />
+                      <span className="h-3 w-3 rounded-full shrink-0" style={{ background: color, boxShadow: `0 0 0 3px ${color}33` }} />
                       <div className="min-w-0 flex-1">
                         <div className="font-medium truncate" style={{ color }}>{label}</div>
                         <div className="text-xs text-muted-foreground truncate">
