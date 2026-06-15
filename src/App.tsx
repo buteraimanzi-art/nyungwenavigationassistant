@@ -18,6 +18,7 @@ import AdminDashboard from "./pages/AdminDashboard.tsx";
 import AdminAlerts from "./pages/AdminAlerts.tsx";
 import AdminCodes from "./pages/AdminCodes.tsx";
 import AdminHikers from "./pages/AdminHikers.tsx";
+import AdminAbout from "./pages/AdminAbout.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
               <Route path="/admin/alerts" element={<RequireAuth><AdminAlerts /></RequireAuth>} />
               <Route path="/admin/codes" element={<RequireAuth><AdminCodes /></RequireAuth>} />
               <Route path="/admin/hikers" element={<RequireAuth><AdminHikers /></RequireAuth>} />
+              <Route path="/admin/about" element={<RequireAuth><AdminAbout /></RequireAuth>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
