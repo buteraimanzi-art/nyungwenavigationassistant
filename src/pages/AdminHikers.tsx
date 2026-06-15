@@ -34,7 +34,7 @@ function labelForHiker(id: string, ident?: Identity): string {
 
 const PARK_CENTER: [number, number] = [-2.45, 29.25];
 
-function HikerMap({ hikers }: { hikers: Hiker[] }) {
+function HikerMap({ hikers, identities }: { hikers: Hiker[]; identities: Record<string, Identity> }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
@@ -60,16 +60,24 @@ function HikerMap({ hikers }: { hikers: Hiker[] }) {
     hikers.forEach((h) => {
       const ageMs = Date.now() - new Date(h.updated_at).getTime();
       const stale = ageMs > 5 * 60_000;
-      const color = stale ? '#94a3b8' : '#2563eb';
+      const color = stale ? '#94a3b8' : colorForUser(h.user_id);
+      const ident = identities[h.user_id];
+      const label = labelForHiker(h.user_id, ident);
+      const initial = (label[0] ?? '?').toUpperCase();
+      const safeLabel = label.replace(/</g, '&lt;');
       const icon = L.divIcon({
-        html: `<div style="position:relative;width:24px;height:24px;">
-          ${stale ? '' : `<span style="position:absolute;inset:-6px;border-radius:9999px;background:${color};opacity:0.35;animation:hikerPulse 1.6s ease-out infinite"></span>`}
-          <div style="position:relative;background:${color};color:white;border-radius:9999px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)">●</div>
+        html: `<div style="position:relative;display:flex;flex-direction:column;align-items:center;transform:translateY(-6px);">
+          <div style="position:relative;width:28px;height:28px;">
+            ${stale ? '' : `<span style="position:absolute;inset:-7px;border-radius:9999px;background:${color};opacity:0.35;animation:hikerPulse 1.6s ease-out infinite"></span>`}
+            <div style="position:relative;background:${color};color:white;border-radius:9999px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35)">${initial}</div>
+          </div>
+          <div style="margin-top:4px;background:white;color:#0f172a;font-size:11px;font-weight:600;padding:2px 6px;border-radius:6px;border:1px solid ${color};max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 3px rgba(0,0,0,0.2)">${safeLabel}</div>
         </div><style>@keyframes hikerPulse{0%{transform:scale(1);opacity:0.45}100%{transform:scale(2.4);opacity:0}}</style>`,
-        className: '', iconSize: [24, 24], iconAnchor: [12, 12],
+        className: '', iconSize: [160, 56], iconAnchor: [80, 14],
       });
+      const emailLine = ident?.email ? `<br/><span style="font-size:11px;color:#64748b">${ident.email}</span>` : '';
       L.marker([h.latitude, h.longitude], { icon })
-        .bindPopup(`<div style="font-family:inherit"><b>${h.trail_name ?? 'Hiker'}</b><br/><span style="font-size:11px;color:#64748b">User ${h.user_id.slice(0, 8)}…</span><br/><span style="font-size:11px">${stale ? 'Last seen' : 'Updated'} ${new Date(h.updated_at).toLocaleTimeString()}</span></div>`)
+        .bindPopup(`<div style="font-family:inherit;min-width:160px"><b style="color:${color}">${safeLabel}</b>${emailLine}<br/><span style="font-size:11px">${h.trail_name ?? 'No trail'}</span><br/><span style="font-size:11px;color:#64748b">${stale ? 'Last seen' : 'Updated'} ${new Date(h.updated_at).toLocaleTimeString()}</span></div>`)
         .addTo(layer);
     });
     if (hikers.length === 1) {
@@ -78,7 +86,7 @@ function HikerMap({ hikers }: { hikers: Hiker[] }) {
       const bounds = L.latLngBounds(hikers.map((h) => [h.latitude, h.longitude] as [number, number]));
       map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
     }
-  }, [hikers]);
+  }, [hikers, identities]);
 
   return <div className="relative w-full h-[480px] rounded-lg overflow-hidden border border-border"><div ref={containerRef} className="absolute inset-0" /></div>;
 }
