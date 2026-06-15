@@ -16,6 +16,21 @@ import { NYUNGWE_POLYGON_LATLNG } from '@/lib/nyungwe-boundary';
 import { useEffect as useEffectMap, useRef } from 'react';
 
 type Hiker = Database['public']['Tables']['user_locations']['Row'];
+type Identity = { email: string | null; full_name: string | null };
+
+// Deterministic color from user id (golden-angle hue)
+function colorForUser(id: string): string {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  const hue = (hash * 137.508) % 360;
+  return `hsl(${hue.toFixed(0)}, 75%, 45%)`;
+}
+
+function labelForHiker(id: string, ident?: Identity): string {
+  if (ident?.full_name && ident.full_name.trim()) return ident.full_name.trim();
+  if (ident?.email) return ident.email;
+  return `User ${id.slice(0, 8)}…`;
+}
 
 const PARK_CENTER: [number, number] = [-2.45, 29.25];
 
