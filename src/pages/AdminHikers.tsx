@@ -190,7 +190,7 @@ export default function AdminHikers() {
             <CardTitle className="text-base flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /> Map</CardTitle>
           </CardHeader>
           <CardContent>
-            <HikerMap hikers={hikers ?? []} />
+            <HikerMap hikers={hikers ?? []} identities={identities} />
             <div className="flex flex-wrap gap-3 mt-3 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#2563eb]" />Active (&lt; 5 min)</span>
               <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#94a3b8]" />Stale</span>
