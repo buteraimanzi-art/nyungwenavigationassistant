@@ -94,6 +94,27 @@ function HikerMap({ hikers, identities }: { hikers: Hiker[]; identities: Record<
 export default function AdminHikers() {
   const { user, isAdmin, loading } = useAuth();
   const [hikers, setHikers] = useState<Hiker[] | null>(null);
+  const [identities, setIdentities] = useState<Record<string, Identity>>({});
+
+  // Fetch identities for any user ids we don't yet have
+  useEffect(() => {
+    if (!isAdmin || !hikers || hikers.length === 0) return;
+    const missing = hikers.map((h) => h.user_id).filter((id) => !(id in identities));
+    if (missing.length === 0) return;
+    let cancelled = false;
+    (supabase.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data: { user_id: string; email: string | null; full_name: string | null }[] | null }>)
+      ('admin_get_hiker_identities', { _ids: missing })
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        setIdentities((prev) => {
+          const next = { ...prev };
+          for (const id of missing) next[id] = { email: null, full_name: null };
+          for (const row of data) next[row.user_id] = { email: row.email, full_name: row.full_name };
+          return next;
+        });
+      });
+    return () => { cancelled = true; };
+  }, [hikers, isAdmin, identities]);
 
   useEffect(() => {
     if (!isAdmin) return;
