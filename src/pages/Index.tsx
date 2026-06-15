@@ -23,7 +23,7 @@ import type { Reception } from '@/lib/receptions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Navigation, ArrowLeft, X, ChevronUp, ChevronDown, Clock, Mountain, Footprints } from 'lucide-react';
+import { MapPin, Navigation, ArrowLeft, X, ChevronUp, ChevronDown, Clock, Mountain, Footprints, Users } from 'lucide-react';
 import nyungweHero from '@/assets/nyungwe-hero.jpg';
 import nyungweLogo from '@/assets/nyungwe-logo.webp';
 
@@ -264,6 +264,61 @@ export default function Index() {
           {/* Community adventures from Relive */}
           <div className="gradient-subtle border-b border-border/60">
             <ReliveCommunityFeed limit={6} />
+          </div>
+
+          {/* About us */}
+          <div id="about" className="py-12 sm:py-20 border-b border-border/60 bg-background">
+            <div className="container max-w-6xl mx-auto px-4">
+              <div className="mb-8 sm:mb-10 max-w-2xl animate-fade-in-up">
+                <p className="uppercase tracking-[0.2em] text-xs font-semibold text-primary mb-3">
+                  · Meet the team
+                </p>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground tracking-tight text-balance">
+                  About us
+                </h2>
+                <p className="text-muted-foreground mt-3 leading-relaxed text-sm sm:text-base">
+                  The people leading the Nyungwe Navigation Assistant.
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <Card className="overflow-hidden">
+                  <CardContent className="p-6 flex items-start gap-4">
+                    <div className="h-16 w-16 shrink-0 rounded-full flex items-center justify-center text-xl font-bold text-primary-foreground bg-primary" aria-hidden>
+                      NF
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-lg font-semibold">Nzayisenga Feline</div>
+                      <div className="text-sm text-primary font-medium">Co-CEO &amp; Co-Founder</div>
+                      <p className="text-sm text-muted-foreground mt-2">Drives the vision and strategy behind safer, smarter exploration of Nyungwe National Park.</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="overflow-hidden">
+                  <CardContent className="p-6 flex items-start gap-4">
+                    <div className="h-16 w-16 shrink-0 rounded-full flex items-center justify-center text-xl font-bold text-primary-foreground bg-primary" aria-hidden>
+                      ND
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-lg font-semibold">Niwemutoni Denyse</div>
+                      <div className="text-sm text-primary font-medium">Co-CEO &amp; Co-Founder</div>
+                      <p className="text-sm text-muted-foreground mt-2">Leads product and operations, focused on giving every hiker a guided, connected experience.</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card className="mt-6">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Users className="h-4 w-4 text-primary" /> Our mission
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm text-muted-foreground">
+                  Nyungwe Navigation Assistant helps visitors discover Nyungwe National Park safely — with real-time trail guidance, emergency support, and tools that connect hikers to rangers when it matters most.
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
           <div data-tour="sos"><EmergencySOS userLocation={userLocation} trailId="" trailName="General" /></div>
