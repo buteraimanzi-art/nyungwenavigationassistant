@@ -209,12 +209,17 @@ export default function AdminHikers() {
               <div className="divide-y divide-border">
                 {hikers.map((h) => {
                   const stale = Date.now() - new Date(h.updated_at).getTime() > 5 * 60_000;
+                  const ident = identities[h.user_id];
+                  const label = labelForHiker(h.user_id, ident);
+                  const color = stale ? 'hsl(var(--muted-foreground))' : colorForUser(h.user_id);
                   return (
                     <div key={h.user_id} className="py-3 flex items-center gap-3 text-sm">
-                      <span className={`h-2.5 w-2.5 rounded-full ${stale ? 'bg-muted-foreground' : 'bg-primary animate-pulse'}`} />
+                      <span className="h-3 w-3 rounded-full shrink-0" style={{ background: color, boxShadow: stale ? 'none' : `0 0 0 3px ${color}33` }} />
                       <div className="min-w-0 flex-1">
-                        <div className="font-medium truncate">{h.trail_name ?? 'No trail'}</div>
-                        <div className="text-xs text-muted-foreground font-mono">User {h.user_id.slice(0, 8)}…</div>
+                        <div className="font-medium truncate" style={{ color }}>{label}</div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {ident?.email && ident.full_name ? ident.email + ' · ' : ''}{h.trail_name ?? 'No trail'}
+                        </div>
                       </div>
                       <a href={`https://www.google.com/maps?q=${h.latitude},${h.longitude}`} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline whitespace-nowrap">
                         {h.latitude.toFixed(4)}, {h.longitude.toFixed(4)}
